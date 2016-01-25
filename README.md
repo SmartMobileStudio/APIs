@@ -1,2 +1,2 @@
 # APIs
-Object Pascal APIs for various JavaScript libraries
+This repository will contain the Object Pascal headers of several APIs for various JavaScript libraries. The headers are mostly translated automatically and might not be tested in every detail. 
