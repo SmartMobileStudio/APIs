@@ -1305,30 +1305,68 @@ type
     procedure increaseIndent;
     procedure decreaseIndent;
     procedure clear;
+    procedure trackSymbol(symbol: JSymbol); overload;
+    procedure trackSymbol(symbol: JSymbol; enclosingDeclaration: JNode); overload;
     procedure trackSymbol(symbol: JSymbol; enclosingDeclaration: JNode;
-      meaning: TSymbolFlags);
+      meaning: TSymbolFlags); overload;
   end;
 
   JSymbolDisplayBuilder = class external
+    procedure buildTypeDisplay(&type: JType; writer: JSymbolWriter); overload;
     procedure buildTypeDisplay(&type: JType; writer: JSymbolWriter;
-      enclosingDeclaration: JNode; flags: TTypeFormatFlags);
+      enclosingDeclaration: JNode); overload;
+    procedure buildTypeDisplay(&type: JType; writer: JSymbolWriter;
+      enclosingDeclaration: JNode; flags: TTypeFormatFlags); overload;
+    procedure buildSymbolDisplay(symbol: JSymbol; writer: JSymbolWriter); overload;
     procedure buildSymbolDisplay(symbol: JSymbol; writer: JSymbolWriter;
-      enclosingDeclaration: JNode; meaning: TSymbolFlags; flags: TSymbolFormatFlags);
+      enclosingDeclaration: JNode); overload;
+    procedure buildSymbolDisplay(symbol: JSymbol; writer: JSymbolWriter;
+      enclosingDeclaration: JNode; meaning: TSymbolFlags); overload;
+    procedure buildSymbolDisplay(symbol: JSymbol; writer: JSymbolWriter;
+      enclosingDeclaration: JNode; meaning: TSymbolFlags;
+      flags: TSymbolFormatFlags); overload;
+    procedure buildSignatureDisplay(signatures: JSignature; writer: JSymbolWriter); overload;
     procedure buildSignatureDisplay(signatures: JSignature; writer: JSymbolWriter;
-      enclosingDeclaration: JNode; flags: TTypeFormatFlags);
+      enclosingDeclaration: JNode); overload;
+    procedure buildSignatureDisplay(signatures: JSignature; writer: JSymbolWriter;
+      enclosingDeclaration: JNode; flags: TTypeFormatFlags); overload;
+    procedure buildParameterDisplay(parameter: JSymbol; writer: JSymbolWriter); overload;
     procedure buildParameterDisplay(parameter: JSymbol; writer: JSymbolWriter;
-      enclosingDeclaration: JNode; flags: TTypeFormatFlags);
-    procedure buildTypeParameterDisplay(tp: JTypeParameter; writer: JSymbolWriter;
-      enclosingDeclaration: JNode; flags: TTypeFormatFlags);
+      enclosingDeclaration: JNode); overload;
+    procedure buildParameterDisplay(parameter: JSymbol; writer: JSymbolWriter;
+      enclosingDeclaration: JNode; flags: TTypeFormatFlags); overload;
+    procedure buildTypeParameterDisplay(tp: JTypeParameter;
+      writer: JSymbolWriter); overload;
+    procedure buildTypeParameterDisplay(tp: JTypeParameter;
+      writer: JSymbolWriter; enclosingDeclaration: JNode); overload;
+    procedure buildTypeParameterDisplay(tp: JTypeParameter;
+      writer: JSymbolWriter; enclosingDeclaration: JNode;
+      flags: TTypeFormatFlags); overload;
+    procedure buildTypeParameterDisplayFromSymbol(symbol: JSymbol; writer: JSymbolWriter); overload;
     procedure buildTypeParameterDisplayFromSymbol(symbol: JSymbol;
-      writer: JSymbolWriter; enclosingDeclaraiton: JNode; flags: TTypeFormatFlags);
-    procedure buildDisplayForParametersAndDelimiters(parameters: array of JSymbol;
-      writer: JSymbolWriter; enclosingDeclaration: JNode; flags: TTypeFormatFlags);
+      writer: JSymbolWriter; enclosingDeclaraiton: JNode); overload;
+    procedure buildTypeParameterDisplayFromSymbol(symbol: JSymbol;
+      writer: JSymbolWriter; enclosingDeclaraiton: JNode;
+      flags: TTypeFormatFlags); overload;
+    procedure buildDisplayForParametersAndDelimiters(
+      parameters: array of JSymbol; writer: JSymbolWriter); overload;
+    procedure buildDisplayForParametersAndDelimiters(
+      parameters: array of JSymbol; writer: JSymbolWriter; enclosingDeclaration: JNode); overload;
+    procedure buildDisplayForParametersAndDelimiters(
+      parameters: array of JSymbol; writer: JSymbolWriter;
+      enclosingDeclaration: JNode; flags: TTypeFormatFlags); overload;
+    procedure buildDisplayForTypeParametersAndDelimiters(
+      typeParameters: array of JTypeParameter; writer: JSymbolWriter); overload;
+    procedure buildDisplayForTypeParametersAndDelimiters(
+      typeParameters: array of JTypeParameter; writer: JSymbolWriter; enclosingDeclaration: JNode); overload;
     procedure buildDisplayForTypeParametersAndDelimiters(
       typeParameters: array of JTypeParameter; writer: JSymbolWriter;
-      enclosingDeclaration: JNode; flags: TTypeFormatFlags);
-    procedure buildReturnTypeDisplay(signature: JSignature;
-      writer: JSymbolWriter; enclosingDeclaration: JNode; flags: TTypeFormatFlags);
+      enclosingDeclaration: JNode; flags: TTypeFormatFlags); overload;
+    procedure buildReturnTypeDisplay(signature: JSignature; writer: JSymbolWriter); overload;
+    procedure buildReturnTypeDisplay(signature: JSignature; writer: JSymbolWriter;
+      enclosingDeclaration: JNode); overload;
+    procedure buildReturnTypeDisplay(signature: JSignature; writer: JSymbolWriter;
+      enclosingDeclaration: JNode; flags: TTypeFormatFlags); overload;
   end;
 
   JCallLikeExpression = Variant;
@@ -1358,17 +1396,19 @@ type
     function getSymbolAtLocation(node: JNode): JSymbol;
     function getShorthandAssignmentValueSymbol(location: JNode): JSymbol;
     function getTypeAtLocation(node: JNode): JType;
-    function typeToString(&type: JType; enclosingDeclaration: JNode;
-      flags: TTypeFormatFlags): String;
-    function symbolToString(symbol: JSymbol; enclosingDeclaration: JNode;
-      meaning: TSymbolFlags): String;
+    function typeToString(&type: JType): String; overload;
+    function typeToString(&type: JType; enclosingDeclaration: JNode): String; overload;
+    function typeToString(&type: JType; enclosingDeclaration: JNode; flags: TTypeFormatFlags): String; overload;
+    function symbolToString(symbol: JSymbol): String; overload;
+    function symbolToString(symbol: JSymbol; enclosingDeclaration: JNode): String; overload;
+    function symbolToString(symbol: JSymbol; enclosingDeclaration: JNode; meaning: TSymbolFlags): String; overload;
     function getSymbolDisplayBuilder: JSymbolDisplayBuilder;
     function getFullyQualifiedName(symbol: JSymbol): String;
     function getAugmentedPropertiesOfType(&type: JType): array of JSymbol;
     function getRootSymbols(symbol: JSymbol): array of JSymbol;
     function getContextualType(node: JExpression): JType;
-    function getResolvedSignature(node: JCallLikeExpression;
-      candidatesOutArray: array of JSignature): JSignature;
+    function getResolvedSignature(node: JCallLikeExpression): JSignature; overload;
+    function getResolvedSignature(node: JCallLikeExpression; candidatesOutArray: array of JSignature): JSignature; overload;
     function getSignatureFromDeclaration(declaration: JSignatureDeclaration): JSignature;
     function isImplementationOfOverload(node: JFunctionLikeDeclaration): Boolean;
     function isUndefinedSymbol(symbol: JSymbol): Boolean;
@@ -1388,16 +1428,32 @@ type
   JProgram = class external(JScriptReferenceHost)
     function getRootFileNames: array of String;
     function getSourceFiles: array of JSourceFile;
+    function emit: JEmitResult; overload;
+    function emit(targetSourceFile: JSourceFile): JEmitResult; overload;
+    function emit(targetSourceFile: JSourceFile;
+      writeFile: TWriteFileCallback): JEmitResult; overload;
     function emit(targetSourceFile: JSourceFile; writeFile: TWriteFileCallback;
-      cancellationToken: JCancellationToken): JEmitResult;
-    function getOptionsDiagnostics(cancellationToken: JCancellationToken): array of JDiagnostic;
-    function getGlobalDiagnostics(cancellationToken: JCancellationToken): array of JDiagnostic;
-    function getSyntacticDiagnostics(sourceFile: JSourceFile;
-      cancellationToken: JCancellationToken): array of JDiagnostic;
+      cancellationToken: JCancellationToken): JEmitResult; overload;
+    function getOptionsDiagnostics: array of JDiagnostic; overload;
+    function getOptionsDiagnostics(
+      cancellationToken: JCancellationToken): array of JDiagnostic; overload;
+    function getGlobalDiagnostics: array of JDiagnostic; overload;
+    function getGlobalDiagnostics(
+      cancellationToken: JCancellationToken): array of JDiagnostic; overload;
+    function getSyntacticDiagnostics: array of JDiagnostic; overload;
+    function getSyntacticDiagnostics(
+      sourceFile: JSourceFile): array of JDiagnostic; overload;
+    function getSyntacticDiagnostics(
+      sourceFile: JSourceFile; cancellationToken: JCancellationToken): array of JDiagnostic; overload;
+    function getSemanticDiagnostics: array of JDiagnostic; overload;
+    function getSemanticDiagnostics(
+      sourceFile: JSourceFile): array of JDiagnostic; overload;
     function getSemanticDiagnostics(sourceFile: JSourceFile;
-      cancellationToken: JCancellationToken): array of JDiagnostic;
+      cancellationToken: JCancellationToken): array of JDiagnostic; overload;
+    function getDeclarationDiagnostics: array of JDiagnostic; overload;
+    function getDeclarationDiagnostics(sourceFile: JSourceFile): array of JDiagnostic; overload;
     function getDeclarationDiagnostics(sourceFile: JSourceFile;
-      cancellationToken: JCancellationToken): array of JDiagnostic;
+      cancellationToken: JCancellationToken): array of JDiagnostic; overload;
     function getTypeChecker: JTypeChecker;
   end;
 
@@ -1527,7 +1583,39 @@ type
     error: JDiagnostic; // nullable
   end;
 
+  TWatchFileCallback = procedure(path: String);
+
+  JFileWatcher = class external
+    procedure close;
+  end;
+
+  JSystem = class external
+    args: array of String;
+    newLine: String;
+    useCaseSensitiveFileNames: Boolean;
+    procedure write(s: String);
+    function readFile(path: String): String; overload;
+    function readFile(path: String; encoding: String): String; overload;
+    procedure writeFile(path: String; data: String); overload;
+    procedure writeFile(path: String; data: String; writeByteOrderMark: Boolean); overload;
+    function watchFile(path: String; callback: TWatchFileCallback): JFileWatcher;
+    function resolvePath(path: String): String;
+    function fileExists(path: String): Boolean;
+    function directoryExists(path: String): Boolean;
+    procedure createDirectory(path: String);
+    function getExecutingFilePath: String;
+    function getCurrentDirectory: String;
+    function readDirectory(path: String): array of String; overload;
+    function readDirectory(path: String; extension: String): array of String; overload;
+    function readDirectory(path: String; extension: String; _exclude: array of String): array of String; overload;
+    function getMemoryUsage: Integer;
+    procedure &exit; overload;
+    procedure &exit(exitCode: Integer); overload;
+  end;
+
   JTypeScriptExport = class external
+    sys: JSystem;
+
     function tokenToString(t: TSyntaxKind): string; external;
     function getPositionOfLineAndCharacter(sourceFile: JSourceFile; line, character: Integer): Integer; external;
     function getLineAndCharacterOfPosition(sourceFile: JSourceFile; position: Integer): JLineAndCharacter; external;
