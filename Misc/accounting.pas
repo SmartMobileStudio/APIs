@@ -1,6 +1,8 @@
 unit Accounting;
 
-interface
+// Project: http://openexchangerates.github.io/accounting.js/
+// Original TypeScript Definitions by:
+//   Sergey Gerasimov <https://github.com/gerich-home/>
 
 type
   JIAccountingCurrencyFormat = class external
