@@ -34,6 +34,12 @@ type
     domain: String; // nullable
   end;
 
+  JVersion = class external
+    major: Integer;
+    minor: Integer;
+    patch: Integer;
+  end;
+
   JPhantom = class external
     args: array of String;
     cookies: array of JCookie;
@@ -41,11 +47,7 @@ type
     libraryPath: String;
     scriptName: String;
     onError: function (msg: String; trace: array of String): Variant;
-    version: record
-      major: Integer;
-      minor: Integer;
-      patch: Integer;
-    end;
+    version: JVersion;
     function addCookie(cookie: JCookie): Boolean;
     procedure clearCookies;
     function deleteCookie(cookieName: String): Boolean;
@@ -54,14 +56,16 @@ type
     function injectJs(filename: String): Boolean;
   end;
 
+  JSystemOS = class external
+    architecture: String;
+    name: String;
+    version: String;
+  end;
+
   JSystem = class external
     pid: Integer;
     platform: String;
-    os: record
-      architecture: String;
-      name: String;
-      version: String;
-    end;
+    os: JSystemOS;
 (*
     env: record
       // property Item[name: String]: String;
@@ -239,7 +243,7 @@ type
     procedure goForward;
     procedure includeJs(url: String; callback: procedure);
     function injectJs(filename: String): Boolean;
-    procedure open(url: String; callback: function(status: String): Variant); overload;
+    procedure open(url: String; callback: procedure(status: String)); overload;
     procedure open(url: String; method: String; callback: function(status: String): Variant); overload;
     procedure open(url: String; method: String; data: Variant; callback: function(status: String): Variant); overload;
     procedure openUrl(url: String; httpConf: Variant; settings: Variant);
@@ -314,12 +318,22 @@ type
     procedure touch(path: String);
   end;
 
-(*
-function require(module: String): Variant;
-phantom: JPhantom;
-//"webpage"
+  JWebPageModule = class external
+    function create: JWebPage; external;
+  end;
 
-function create: JWebPage;
+	// NoInterfaceObject,Exposed=Window,Worker
+	JWindow = class external
+	public
+		function setTimeout(handler: procedure; timeout: Integer = 0; arguments: Variant = nil): Integer;
+		procedure clearTimeout(handle: Integer = 0);
+		function setInterval(handler: procedure; timeout: Integer = 0; arguments: Variant = nil): Integer;
+		procedure clearInterval(handle: Integer = 0);
+	end;
 
-*)
 
+var
+  Phantom external 'phantom': JPhantom;
+  Window external 'window': JWindow;
+
+function require(module: String): Variant; external;
