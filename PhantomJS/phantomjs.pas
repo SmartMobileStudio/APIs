@@ -1,4 +1,4 @@
-unit Phantomjs;
+unit PhantomJS;
 
 // Project: https://github.com/ariya/phantomjs/wiki/API-Reference
 // Original TypeScript Definitions by: 
@@ -40,7 +40,8 @@ type
     cookiesEnabled: Boolean;
     libraryPath: String;
     scriptName: String;
-    version: record 
+    onError: function (msg: String; trace: array of String): Variant;
+    version: record
       major: Integer;
       minor: Integer;
       patch: Integer;
@@ -51,7 +52,6 @@ type
     function &exit: Boolean; overload;
     function &exit(returnValue: Variant): Boolean; overload;
     function injectJs(filename: String): Boolean;
-    onError: function (msg: String; trace: array of String): Variant;
   end;
 
   JSystem = class external
@@ -63,8 +63,9 @@ type
       version: String;
     end;
 (*
-    env:       // property Item[name: String]: String;
-    end;;
+    env: record
+      // property Item[name: String]: String;
+    end;
 *)
     args: array of String;
   end;
@@ -96,14 +97,17 @@ type
     errorString: String;
   end;
 
+  JHeaders = class external
+    function GetItems(name : String) : String; external array;
+
+    property Items[name : String] : String read GetItems; default;
+  end;
+
   JResourceResponse = class external
     id: Integer;
     url: String;
     time: JDate;
-(*
-    headers:       // property Item[name: String]: String;
-    end;;
-*)
+    headers: JHeaders;
     bodySize: Integer;
     contentType: String; // nullable
     redirectURL: String; // nullable
@@ -117,10 +121,7 @@ type
     &method: String;
     url: String;
     time: JDate;
-(*
-    headers:       // property Item[name: String]: String;
-    end;;
-*)
+    headers: JHeaders;
   end;
 
   JNetworkRequest = class external
@@ -129,13 +130,55 @@ type
     procedure setHeader(name: String; value: String);
   end;
 
+  JStream = class external
+    function atEnd: Boolean;
+    procedure close;
+    procedure flush;
+    function read: String;
+    function readLine: String;
+    procedure seek(position: Integer);
+    procedure write(data: String);
+    procedure writeLine(data: String);
+  end;
+
+  JWebServerRequest = class external
+    &method: String;
+    url: String;
+    httpVersion: Integer;
+    headers: JHeaders;
+    post: String;
+    postRaw: String;
+  end;
+
+  JWebServerResponse = class external
+    headers: JHeaders;
+    procedure setHeader(name: String; value: String);
+    function header(name: String): String;
+    statusCode: Integer;
+    procedure setEncoding(encoding: String);
+    procedure write(data: String);
+    procedure writeHead(statusCode: Integer); overload;
+    procedure writeHead(statusCode: Integer; headers: JHeaders); overload;
+    procedure close;
+    procedure closeGracefully;
+  end;
+
+  JWebServer = class external
+    port: Integer;
+    function listen(port: Integer): Boolean; overload;
+    function listen(port: Integer; cb: procedure(request: JWebServerRequest; response: JWebServerResponse)): Boolean; overload;
+    function listen(ipAddressPort: String): Boolean; overload;
+    function listen(ipAddressPort: String; cb: procedure(request: JWebServerRequest; response: JWebServerResponse)): Boolean; overload;
+    procedure close;
+  end;
+
   JWebPage = class external
     canGoBack: Boolean;
     canGoForward: Boolean;
     clipRect: JClipRect;
     content: String;
     cookies: array of JCookie;
-    // customHeaders:       // property Item[name: String]: String;
+    customHeaders: JHeaders;
     event: Variant;
     focusedFrameName: String;
     frameContent: String;
@@ -161,50 +204,9 @@ type
     viewportSize: JSize;
     windowName: String;
     zoomFactor: Float;
-    function addCookie(cookie: JCookie): Boolean;
-    function childFramesCount: Integer;
-    function childFramesName: String;
-    procedure clearCookies;
-    procedure close;
-    function currentFrameName: String;
-    function deleteCookie(cookieName: String): Boolean;
-    function evaluate(fn: function: Variant; args: array of Variant): Variant;
-    procedure evaluateAsync(fn: function: Variant);
-    function evaluateJavascript(str: String): Variant;
-    function getPage(windowName: String): JWebPage;
-    procedure go(index: Integer);
-    procedure goBack;
-    procedure goForward;
-    procedure includeJs(url: String; callback: function: Variant);
-    function injectJs(filename: String): Boolean;
-    procedure open(url: String; callback: function(status: String): Variant); overload;
-    procedure open(url: String; method: String; callback: function(status: String): Variant); overload;
-    procedure open(url: String; method: String; data: Variant; callback: function(status: String): Variant); overload;
-    procedure openUrl(url: String; httpConf: Variant; settings: Variant);
-    procedure release;
-    procedure reload;
-    procedure render(filename: String);
-    function renderBase64(format: String): String;
-    procedure sendEvent(mouseEventType: String); overload;
-    procedure sendEvent(mouseEventType: String; mouseX: Float); overload;
-    procedure sendEvent(mouseEventType: String; mouseX: Float; mouseY: Float); overload;
-    procedure sendEvent(mouseEventType: String; mouseX: Float; mouseY: Float; button: String); overload;
-    procedure sendEvent(keyboardEventType: String; keyOrKeys: Variant); overload;
-    procedure sendEvent(keyboardEventType: String; keyOrKeys: Variant; aNull: Variant); overload;
-    procedure sendEvent(keyboardEventType: String; keyOrKeys: Variant; aNull: Variant; bNull: Variant); overload;
-    procedure sendEvent(keyboardEventType: String; keyOrKeys: Variant; aNull: Variant; bNull: Variant; modifier: Integer); overload;
-    procedure setContent(content: String; url: String);
-    procedure stop;
-    procedure switchToFocusedFrame;
-    procedure switchToFrame(frameName: String); overload;
-    procedure switchToFrame(framePosition: Integer); overload;
-    procedure switchToChildFrame(frameName: String); overload;
-    procedure switchToChildFrame(framePosition: Integer); overload;
-    procedure switchToMainFrame;
-    procedure switchToParentFrame;
-    procedure uploadFile(selector: String; filename: String);
-    onAlert: function(msg: String): Variant;
-    onCallback: function: Variant;
+
+    onAlert: function (msg: String): Variant;
+    onCallback: procedure;
     onClosing: function(closingPage: JWebPage): Variant;
     onConfirm: function(msg: String): Boolean;
     onConsoleMessage: function(msg: String; lineNum: Integer; sourceId: String): Variant;
@@ -220,6 +222,49 @@ type
     onResourceReceived: function(response: JResourceResponse): Variant;
     onResourceRequested: function(requestData: JResourceRequest; networkRequest: JNetworkRequest): Variant;
     onUrlChanged: function(targetUrl: String): Variant;
+
+    function addCookie(cookie: JCookie): Boolean;
+    function childFramesCount: Integer;
+    function childFramesName: String;
+    procedure clearCookies;
+    procedure close;
+    function currentFrameName: String;
+    function deleteCookie(cookieName: String): Boolean;
+    function evaluate(fn: procedure; args: array of Variant): Variant;
+    procedure evaluateAsync(fn: procedure);
+    function evaluateJavascript(str: String): Variant;
+    function getPage(windowName: String): JWebPage;
+    procedure go(index: Integer);
+    procedure goBack;
+    procedure goForward;
+    procedure includeJs(url: String; callback: procedure);
+    function injectJs(filename: String): Boolean;
+    procedure open(url: String; callback: function(status: String): Variant); overload;
+    procedure open(url: String; method: String; callback: function(status: String): Variant); overload;
+    procedure open(url: String; method: String; data: Variant; callback: function(status: String): Variant); overload;
+    procedure openUrl(url: String; httpConf: Variant; settings: Variant);
+    procedure release;
+    procedure reload;
+    procedure render(filename: String);
+    function renderBase64(format: String): String;
+    procedure sendEvent(mouseEventType: String); overload;
+    procedure sendEvent(mouseEventType: String; mouseX: Float); overload;
+    procedure sendEvent(mouseEventType: String; mouseX, mouseY: Float); overload;
+    procedure sendEvent(mouseEventType: String; mouseX, mouseY: Float; button: String); overload;
+    procedure sendEvent(keyboardEventType: String; keyOrKeys: Variant); overload;
+    procedure sendEvent(keyboardEventType: String; keyOrKeys, aNull: Variant); overload;
+    procedure sendEvent(keyboardEventType: String; keyOrKeys, aNull, bNull: Variant); overload;
+    procedure sendEvent(keyboardEventType: String; keyOrKeys, aNull, bNull: Variant; modifier: Integer); overload;
+    procedure setContent(content: String; url: String);
+    procedure stop;
+    procedure switchToFocusedFrame;
+    procedure switchToFrame(frameName: String); overload;
+    procedure switchToFrame(framePosition: Float); overload;
+    procedure switchToChildFrame(frameName: String);
+    procedure switchToChildFrame(framePosition: Float); overload;
+    procedure switchToMainFrame;
+    procedure switchToParentFrame;
+    procedure uploadFile(selector: String; filename: String);
     procedure closing(closingPage: JWebPage);
     procedure initialized;
     procedure javaScriptAlertSent(msg: String);
@@ -233,17 +278,6 @@ type
     procedure resourceReceived(response: JResourceResponse);
     procedure resourceRequested(requestData: JResourceRequest; networkRequest: JNetworkRequest);
     procedure urlChanged(targetUrl: String);
-  end;
-
-  JStream = class external
-    function atEnd: Boolean;
-    procedure close;
-    procedure flush;
-    function read: String;
-    function readLine: String;
-    procedure seek(position: Integer);
-    procedure write(data: String);
-    procedure writeLine(data: String);
   end;
 
   JFileSystem = class external
@@ -280,49 +314,12 @@ type
     procedure touch(path: String);
   end;
 
-  JWebServerRequest = class external
-    &method: String;
-    url: String;
-    httpVersion: Integer;
-(*
-    headers:       // property Item[name: String]: String;
-    end;;
-*)
-    post: String;
-    postRaw: String;
-  end;
-
-  JWebServerResponse = class external
-(*
-    headers:       // property Item[name: String]: String;
-    end;;
-*)
-    procedure setHeader(name: String; value: String);
-    function header(name: String): String;
-    statusCode: Integer;
-    procedure setEncoding(encoding: String);
-    procedure write(data: String);
-    procedure writeHead(statusCode: Integer); overload;
-(*
-    procedure writeHead(statusCode: Integer; headers: record
-      // property Item[name: String]: String;
-    end); overload;
-*)
-    procedure close;
-    procedure closeGracefully;
-  end;
-
-  JWebServer = class external
-    port: Integer;
-    function listen(port: Integer): Boolean; overload;
-    function listen(port: Integer; cb: procedure(request: JWebServerRequest; response: JWebServerResponse)): Boolean; overload;
-    function listen(ipAddressPort: String): Boolean; overload;
-    function listen(ipAddressPort: String; cb: procedure(request: JWebServerRequest; response: JWebServerResponse)): Boolean; overload;
-    procedure close;
-  end;
-
 (*
 function require(module: String): Variant;
 phantom: JPhantom;
+//"webpage"
+
 function create: JWebPage;
+
 *)
+
