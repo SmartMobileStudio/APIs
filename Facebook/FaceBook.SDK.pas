@@ -150,8 +150,7 @@ type
   end;
 
 	JWindow = partial class external 'Window'
-    function fbAsyncInit: Variant;
+    fbAsyncInit: Variant;
   end;
 
-var
-  FaceBook external 'FB': JFBSDK;
+var FaceBookSDK external 'FB': JFBSDK;
