@@ -2,6 +2,8 @@ unit MatterJS;
 
 interface
 
+{$R 'matter.min.js'}
+
 uses
   W3C.HTML5, W3C.Canvas2DContext, W3C.SVG1;
 
@@ -9,9 +11,9 @@ type
   JVector = class external 'Vector'
     x: Float;
     y: Float;
-    function create: JVector; overload;
-    function create(x: Float): JVector; overload;
-    function create(x, y: Float): JVector; overload;
+    class function create: JVector; overload;
+    class function create(x: Float): JVector; overload;
+    class function create(x, y: Float): JVector; overload;
     function clone(vector: JVector): JVector;
     function cross3(vectorA, vectorB, vectorC: JVector): Float;
     function add(vectorA, vectorB: JVector): JVector; overload;
@@ -108,7 +110,7 @@ type
 
   JBody = class external 'Body'
     procedure applyForce(body: JBody; position, force: JVector);
-    function create(options: JIBodyDefinition): JBody;
+    class function create(options: JIBodyDefinition): JBody;
     procedure rotate(body: JBody; rotation: Float);
     function nextGroup(isNonColliding: Boolean): Float;
     function nextCategory: Float;
@@ -164,21 +166,21 @@ type
     collisionFilter: JICollisionFilter;
   end;
 
-  JBodies = class external 'Bodies'
-    function circle(x, y, radius: Float): JBody; overload;
-    function circle(x, y, radius: Float; options: JIBodyDefinition): JBody; overload;
-    function circle(x, y, radius: Float; options: JIBodyDefinition; maxSides: Float): JBody; overload;
-    function polygon(x, y, sides, radius: Float): JBody; overload;
-    function polygon(x, y, sides, radius: Float; options: JIBodyDefinition): JBody; overload;
-    function rectangle(x, y, width, height: Float): JBody; overload;
-    function rectangle(x, y, width, height: Float; options: JIBodyDefinition): JBody; overload;
-    function trapezoid(x, y, width, height, slope: Float): JBody; overload;
-    function trapezoid(x, y, width, height, slope: Float; options: JIBodyDefinition): JBody; overload;
-    function fromVertices(x, y: Float; vertexSets: array of Variant): JBody; overload;
-    function fromVertices(x, y: Float; vertexSets: array of Variant; options: JIBodyDefinition): JBody; overload;
-    function fromVertices(x, y: Float; vertexSets: array of Variant; options: JIBodyDefinition; flagInternal: Boolean): JBody; overload;
-    function fromVertices(x, y: Float; vertexSets: array of Variant; options: JIBodyDefinition; flagInternal: Boolean; removeCollinear: Float): JBody; overload;
-    function fromVertices(x, y: Float; vertexSets: array of Variant; options: JIBodyDefinition; flagInternal: Boolean; removeCollinear, minimumArea: Float): JBody; overload;
+  JBodies = class external 'Matter.Bodies'
+    class function circle(x, y, radius: Float): JBody; overload;
+    class function circle(x, y, radius: Float; options: JIBodyDefinition): JBody; overload;
+    class function circle(x, y, radius: Float; options: JIBodyDefinition; maxSides: Float): JBody; overload;
+    class function polygon(x, y, sides, radius: Float): JBody; overload;
+    class function polygon(x, y, sides, radius: Float; options: JIBodyDefinition): JBody; overload;
+    class function rectangle(x, y, width, height: Float): JBody; overload;
+    class function rectangle(x, y, width, height: Float; options: JIBodyDefinition): JBody; overload;
+    class function trapezoid(x, y, width, height, slope: Float): JBody; overload;
+    class function trapezoid(x, y, width, height, slope: Float; options: JIBodyDefinition): JBody; overload;
+    class function fromVertices(x, y: Float; vertexSets: array of Variant): JBody; overload;
+    class function fromVertices(x, y: Float; vertexSets: array of Variant; options: JIBodyDefinition): JBody; overload;
+    class function fromVertices(x, y: Float; vertexSets: array of Variant; options: JIBodyDefinition; flagInternal: Boolean): JBody; overload;
+    class function fromVertices(x, y: Float; vertexSets: array of Variant; options: JIBodyDefinition; flagInternal: Boolean; removeCollinear: Float): JBody; overload;
+    class function fromVertices(x, y: Float; vertexSets: array of Variant; options: JIBodyDefinition; flagInternal: Boolean; removeCollinear, minimumArea: Float): JBody; overload;
   end;
 
   JComposite = class;
@@ -214,7 +216,7 @@ type
   end;
 
   JConstraint = class external 'Constraint'
-    function create(options: JIConstraintDefinition): JConstraint;
+    class function create(options: JIConstraintDefinition): JConstraint;
     bodyA: JBody;
     bodyB: JBody;
     id: Float;
@@ -228,21 +230,25 @@ type
   end;
 
   JComposite = class external 'Composite'
-    function add(composite: JComposite; &object: Variant {JBody or JComposite or JConstraint}): JComposite;
+    function add(composite: JComposite; &object: JBody): JComposite; overload;
+    function add(composite: JComposite; &object: JComposite): JComposite; overload;
+    function add(composite: JComposite; &object: JConstraint): JComposite; overload;
     function allBodies(composite: JComposite): array of Variant;
     function allComposites(composite: JComposite): array of Variant;
     function allConstraints(composite: JComposite): array of Variant;
     procedure clear(composite: JComposite; keepStatic: Boolean); overload;
     procedure clear(composite: JComposite; keepStatic, deep: Boolean); overload;
-    function create: JComposite; overload;
-    function create(options: JICompositeDefinition): JComposite; overload;
+    class function create: JComposite; overload;
+    class function create(options: JICompositeDefinition): JComposite; overload;
     function get(composite: JComposite; id: Float; &type: String): Variant {JBody or JComposite or JConstraint};
     function move(compositeA: JComposite; objects: array of Variant; compositeB: JComposite): JComposite;
     function rebase(composite: JComposite): JComposite;
     function remove(composite: JComposite; &object: JBody): JComposite; overload;
     function remove(composite: JComposite; &object: JComposite): JComposite; overload;
     function remove(composite: JComposite; &object: JConstraint): JComposite; overload;
-    function remove(composite: JComposite; &object: Variant {JBody or JComposite or JConstraint}; deep: Boolean): JComposite; overload;
+    function remove(composite: JComposite; &object: JBody; deep: Boolean): JComposite; overload;
+    function remove(composite: JComposite; &object: JComposite; deep: Boolean): JComposite; overload;
+    function remove(composite: JComposite; &object: JConstraint; deep: Boolean): JComposite; overload;
     procedure setModified(composite: JComposite; isModified: Boolean); overload;
     procedure setModified(composite: JComposite; isModified, updateParents: Boolean); overload;
     procedure setModified(composite: JComposite; isModified, updateParents, updateChildren: Boolean); overload;
@@ -284,8 +290,8 @@ type
   JWorld = class;
 
   JGrid = class external 'Grid'
-    function create: JGrid; overload;
-    function create(options: JIGridDefinition): JGrid; overload;
+    class function create: JGrid; overload;
+    class function create(options: JIGridDefinition): JGrid; overload;
     procedure update(grid: JGrid; bodies: array of Variant; engine: JEngine; forceUpdate: Boolean);
     procedure clear(grid: JGrid);
   end;
@@ -301,7 +307,7 @@ type
   end;
 
   JMouse = class external 'Mouse'
-    function create(element: JHTMLElement): JMouse;
+    class function create(element: JHTMLElement): JMouse;
     procedure setElement(mouse: JMouse; element: JHTMLElement);
     procedure clearSourceEvents(mouse: JMouse);
     procedure setOffset(mouse: JMouse; offset: JVector);
@@ -328,15 +334,17 @@ type
 
   JRender = class;
 
-  JEngine = class external 'Engine'
-    procedure clear(engine: JEngine);
-    function create: JEngine; overload;
-    function create(element: Variant {JHTMLElement or JIEngineDefinition}): JEngine; overload;
-    function create(element: Variant {JHTMLElement or JIEngineDefinition}; options: JIEngineDefinition): JEngine; overload;
-    procedure merge(engineA, engineB: JEngine);
-    function update(engine: JEngine; delta: Float): JEngine; overload;
-    function update(engine: JEngine; delta, correction: Float): JEngine; overload;
-    procedure run(enige: JEngine);
+  JEngine = class external 'Matter.Engine'
+    class procedure clear(engine: JEngine);
+    class function create: JEngine; overload;
+    class function create(element: JHTMLElement): JEngine; overload;
+    class function create(element: JIEngineDefinition): JEngine; overload;
+    class function create(element: JHTMLElement; options: JIEngineDefinition): JEngine; overload;
+    class function create(element: JIEngineDefinition; options: JIEngineDefinition): JEngine; overload;
+    class procedure merge(engineA, engineB: JEngine);
+    class function update(engine: JEngine; delta: Float): JEngine; overload;
+    class function update(engine: JEngine; delta, correction: Float): JEngine; overload;
+    class procedure run(enige: JEngine);
     broadphase: JGrid;
     constraintIterations: Float;
     enabled: Boolean;
@@ -349,7 +357,7 @@ type
   end;
 
   JMouseConstraint = class external 'MouseConstraint'
-    function create(engine: JEngine; options: JIMouseConstraintDefinition): JMouseConstraint;
+    class function create(engine: JEngine; options: JIMouseConstraintDefinition): JMouseConstraint;
     constraint: JConstraint;
     collisionFilter: JICollisionFilter;
     body: JBody;
@@ -387,7 +395,7 @@ type
   end;
 
   JRender = class external 'Render'
-    function create(options: JIRenderDefinition): JRender;
+    class function create(options: JIRenderDefinition): JRender;
     procedure setPixelRatio(render: JRender; pixelRatio: Float);
     procedure world(engine: JEngine);
     controller: Variant;
@@ -400,7 +408,7 @@ type
   end;
 
   JRunner = class external 'Runner'
-    function create(options: JIRunnerOptions): JRunner;
+    class function create(options: JIRunnerOptions): JRunner;
     function run(runner: JRunner; engine: JEngine): JRunner; overload;
     function run(engine: JEngine): JRunner; overload;
     procedure tick(runner: JRunner; engine: JEngine; time: Float);
@@ -441,13 +449,19 @@ type
     bounds: JBounds; // nullable
   end;
 
-  JWorld = class external 'World'
-    function add(world: JWorld; body: Variant {JBody or array of Variant or JComposite or array of Variant or JConstraint or array of Variant}): JWorld;
-    function addBody(world: JWorld; body: JBody): JWorld;
-    function addComposite(world: JWorld; composite: JComposite): JWorld;
-    function addConstraint(world: JWorld; constraint: JConstraint): JWorld;
-    procedure clear(world: JWorld; keepStatic: Boolean);
-    function create(options: JIWorldDefinition): JWorld;
+  JWorld = class external 'Matter.World'
+    class function add(world: JWorld; body: JBody): JWorld; overload;
+    class function add(world: JWorld; body: JComposite): JWorld; overload;
+    class function add(world: JWorld; body: JConstraint): JWorld; overload;
+    class function add(world: JWorld; body: array of JBody): JWorld; overload;
+    class function add(world: JWorld; body: array of JComposite): JWorld; overload;
+    class function add(world: JWorld; body: array of JConstraint): JWorld; overload;
+    class function add(world: JWorld; body: array of Variant): JWorld; overload;
+    class function addBody(world: JWorld; body: JBody): JWorld;
+    class function addComposite(world: JWorld; composite: JComposite): JWorld;
+    class function addConstraint(world: JWorld; constraint: JConstraint): JWorld;
+    class procedure clear(world: JWorld; keepStatic: Boolean);
+    class function create(options: JIWorldDefinition): JWorld;
     gravity: JVector;
     bounds: JBounds;
   end;
