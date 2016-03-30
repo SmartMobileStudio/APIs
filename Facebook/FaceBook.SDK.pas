@@ -84,7 +84,7 @@ type
     profile_selector_ids: String; // nullable
   end;
 
-  TResponseObjectHandler = function(fbResponseObject: JObject): Variant;
+  TResponseObjectHandler = function(fbResponseObject: Variant): Variant;
 
   JFBSDKEvents = class external
     procedure subscribe(event: String; callback: TResponseObjectHandler);
@@ -134,12 +134,13 @@ type
 
   JFBSDK = class external 'FBSDK'
     procedure init(fbInitObject: JFBInitParams);
+    function api(path: String; callback: TResponseObjectHandler): JObject; overload;
     function api(path: String; params: JObject; callback: TResponseObjectHandler): JObject; overload;
     function api(path, method: String; callback: TResponseObjectHandler): JObject; overload;
     function api(path, method: String; params: JObject; callback: TResponseObjectHandler): JObject; overload;
     procedure ui(params: JFBUIParams; handler: TResponseObjectHandler);
-    procedure getLoginStatus(handler: procedure); overload;
-    procedure getLoginStatus(handler: procedure; force: Boolean); overload;
+    procedure getLoginStatus(handler: TResponseObjectHandler); overload;
+    procedure getLoginStatus(handler: TResponseObjectHandler; force: Boolean); overload;
     procedure login(handler: TResponseObjectHandler); overload;
     procedure login(handler: TResponseObjectHandler; params: JFBLoginOptions); overload;
     procedure logout(handler: TResponseObjectHandler);

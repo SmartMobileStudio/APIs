@@ -42,6 +42,12 @@ type
   end;
 
   JBounds = class external 'Bounds'
+    class function contains(bounds: JBounds; point: JVector): Boolean;
+    class function overlaps(boundsA, boundsB: JBounds): Boolean;
+    class procedure shift(bounds: JBounds; position: JVector);
+    class procedure translate(bounds: JBounds; vector: JVector);
+    class procedure update(bounds: JBounds; vertices: array of JVector; velocity: JVector);
+    class function create(vertices: array of JVector): JBounds;
   end;
 
   JIBodyRenderOptionsSprite = class external
