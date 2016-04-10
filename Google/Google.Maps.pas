@@ -53,7 +53,7 @@ type
   JMapsEventListener = class external
   end;
 
-  JLatLng = class external 'LatLng'
+  JLatLng = class external 'google.maps.LatLng'
     constructor Create(lat: Float; lng: Float; noWrap: Boolean);
     function equals(other: JLatLng): Boolean;
     function lat: Float;
@@ -68,7 +68,7 @@ type
     lng: Float;
   end;
 
-  JLatLngBounds = class external 'LatLngBounds'
+  JLatLngBounds = class external 'google.maps.LatLngBounds'
     constructor Create(sw: JLatLng; ne: JLatLng);
     function contains(latLng: JLatLng): Boolean;
     function equals(other: JLatLngBounds): Boolean;
@@ -85,7 +85,7 @@ type
     function union(other: JLatLngBounds): JLatLngBounds;
   end;
 
-  JPoint = class external 'Point'
+  JPoint = class external 'google.maps.Point'
     constructor Create(x: Float; y: Float);
     x: Float;
     y: Float;
@@ -93,7 +93,7 @@ type
     function toString: String;
   end;
 
-  JSize = class external 'Size'
+  JSize = class external 'google.maps.Size'
     constructor Create(width: Float; height: Float; widthUnit: String; heightUnit: String);
     height: Float;
     width: Float;
@@ -101,7 +101,7 @@ type
     function toString: String;
   end;
 
-  JMVCObject = class external 'MVCObject'
+  JMVCObject = class external 'google.maps.MVCObject'
     constructor Create;
     function addListener(eventName: String; handler: procedure(args: array of Variant)): JMapsEventListener;
     procedure bindTo(key: String; target: JMVCObject); overload;
@@ -116,7 +116,7 @@ type
     procedure unbindAll;
   end;
 
-  JMVCArray = class external 'MVCArray'(JMVCObject)
+  JMVCArray = class external 'google.maps.MVCArray'(JMVCObject)
     constructor Create(&array: array of Variant);
     procedure clear;
     procedure forEach(callback: procedure(elem: Variant; i: Float));
@@ -241,7 +241,7 @@ type
     zoomControlOptions: JZoomControlOptions; // nullable
   end;
 
-  JStreetViewPanorama = class external 'StreetViewPanorama'
+  JStreetViewPanorama = class external 'google.maps.StreetViewPanorama'
     constructor Create(container: JElement; opts: JStreetViewPanoramaOptions);
     controls: array of JMVCArray;
     function getLinks: array of JStreetViewLink;
@@ -265,7 +265,7 @@ type
   end;
 
   TStreetViewServiceCallback = procedure(streetViewPanoramaData: JStreetViewPanoramaData; streetViewStatus: JStreetViewStatus);
-  JStreetViewService = class external 'StreetViewService'
+  JStreetViewService = class external 'google.maps.StreetViewService'
     procedure getPanoramaById(pano: String; callback: TStreetViewServiceCallback);
     procedure getPanoramaByLocation(latlng: JLatLng; radius: Float;
       callback: TStreetViewServiceCallback); overload;
@@ -273,7 +273,7 @@ type
       callback: TStreetViewServiceCallback); overload;
   end;
 
-  JStreetViewCoverageLayer = class external 'StreetViewCoverageLayer'(JMVCObject)
+  JStreetViewCoverageLayer = class external 'google.maps.StreetViewCoverageLayer'(JMVCObject)
     function getMap: JMap;
     procedure setMap(map: JMap);
   end;
@@ -415,17 +415,17 @@ type
     function fromPointToLatLng(pixel: JPoint; noWrap: Boolean): JLatLng; overload;
   end;
 
-  JDataFeatureOptions = class external 'Data.FeatureOptions'
+  JDataFeatureOptions = class external 'google.maps.data.FeatureOptions'
     geometry: Variant {JData.Geometry or JLatLng or JLatLngLiteral}; // nullable
     id: Variant {Float or String}; // nullable
     properties: JObject; // nullable
   end;
 
-  JDataGeometry = class external 'Data.Geometry'
+  JDataGeometry = class external 'google.maps.data.Geometry'
     function getType: String;
   end;
 
-  JDataFeature = class external 'Data.Feature'
+  JDataFeature = class external 'google.maps.data.Feature'
     constructor Create(options: JDataFeatureOptions);
     procedure forEachProperty(callback: procedure(value: Variant; name: String));
     function getGeometry: JDataGeometry;
@@ -471,7 +471,7 @@ type
     idPropertyName: String; // nullable
   end;
 
-  JData = class external 'Data'(JMVCObject)
+  JData = class external 'google.maps.Data'(JMVCObject)
     constructor Create(options: JDataOptions);
     function add(feature: JDataFeature): JDataFeature; overload;
     function add(feature: JDataFeatureOptions): JDataFeature; overload;
@@ -514,12 +514,12 @@ type
     tileSize: JSize; // nullable
   end;
 
-  JMapTypeRegistry = class external 'MapTypeRegistry'(JMVCObject)
+  JMapTypeRegistry = class external 'google.maps.MapTypeRegistry'(JMVCObject)
     constructor Create;
     procedure set(id: String; mapType: JMapType);
   end;
 
-  JMap = class external 'Map' (JMVCObject)
+  JMap = class external 'google.maps.Map' (JMVCObject)
     constructor Create(mapDiv: JElement; opts: JMapOptions);
     procedure fitBounds(bounds: JLatLngBounds);
     function getBounds: JLatLngBounds;
@@ -580,7 +580,7 @@ type
     zIndex: Float; // nullable
   end;
 
-  JMarker = class external 'Marker'(JMVCObject)
+  JMarker = class external 'google.maps.Marker'(JMVCObject)
     MAX_ZINDEX: Float;
     constructor Create(opts: JMarkerOptions);
     function getAnimation: JAnimation;
@@ -618,7 +618,7 @@ type
     procedure setZIndex(zIndex: Float);
   end;
 
-  JInfoWindow = class external 'InfoWindow'(JMVCObject)
+  JInfoWindow = class external 'google.maps.InfoWindow'(JMVCObject)
     constructor Create(opts: JInfoWindowOptions);
     procedure close;
     function getContent: Variant {String or JElement};
@@ -675,7 +675,7 @@ type
     zIndex: Float; // nullable
   end;
 
-  JPolyline = class external 'Polyline'(JMVCObject)
+  JPolyline = class external 'google.maps.Polyline'(JMVCObject)
     constructor Create(opts: JPolylineOptions);
     function getDraggable: Boolean;
     function getEditable: Boolean;
@@ -692,7 +692,7 @@ type
     procedure setVisible(visible: Boolean);
   end;
 
-  JPolygon = class external 'Polygon'(JMVCObject)
+  JPolygon = class external 'google.maps.Polygon'(JMVCObject)
     constructor Create(opts: JPolygonOptions);
     function getDraggable: Boolean;
     function getEditable: Boolean;
@@ -757,7 +757,7 @@ type
     opacity: Float; // nullable
   end;
 
-  JRectangle = class external 'Rectangle'(JMVCObject)
+  JRectangle = class external 'google.maps.Rectangle'(JMVCObject)
     constructor Create(opts: JRectangleOptions);
     function getBounds: JLatLngBounds;
     function getDraggable: Boolean;
@@ -772,7 +772,7 @@ type
     procedure setVisible(visible: Boolean);
   end;
 
-  JCircle = class external 'Circle'(JMVCObject)
+  JCircle = class external 'google.maps.Circle'(JMVCObject)
     constructor Create(opts: JCircleOptions);
     function getBounds: JLatLngBounds;
     function getCenter: JLatLng;
@@ -791,7 +791,7 @@ type
     procedure setVisible(visible: Boolean);
   end;
 
-  JGroundOverlay = class external 'GroundOverlay'(JMVCObject)
+  JGroundOverlay = class external 'google.maps.GroundOverlay'(JMVCObject)
     constructor Create(url: String; bounds: JLatLngBounds; opts: JGroundOverlayOptions);
     function getBounds: JLatLngBounds;
     function getMap: JMap;
@@ -801,7 +801,7 @@ type
     procedure setOpacity(opacity: Float);
   end;
 
-  JMapCanvasProjection = class external 'MapCanvasProjection'(JMVCObject)
+  JMapCanvasProjection = class external 'google.maps.MapCanvasProjection'(JMVCObject)
     function fromContainerPixelToLatLng(pixel: JPoint): JLatLng; overload;
     function fromContainerPixelToLatLng(pixel: JPoint; nowrap: Boolean): JLatLng; overload;
     function fromDivPixelToLatLng(pixel: JPoint): JLatLng; overload;
@@ -819,7 +819,7 @@ type
     overlayMouseTarget: JElement;
   end;
 
-  JOverlayView = class external 'OverlayView'(JMVCObject)
+  JOverlayView = class external 'google.maps.OverlayView'(JMVCObject)
     procedure draw;
     function getMap: Variant {JMap or JStreetViewPanorama};
     function getPanes: JMapPanes;
@@ -869,7 +869,7 @@ type
     types: array of String;
   end;
 
-  JGeocoder = class external 'Geocoder'
+  JGeocoder = class external 'google.maps.Geocoder'
     procedure geocode(request: JGeocoderRequest; callback: procedure(results: array of JGeocoderResult; status: JGeocoderStatus));
   end;
 
@@ -1018,7 +1018,7 @@ type
     waypoints: array of JDirectionsWaypoint; // nullable
   end;
 
-  JDirectionsRenderer = class external 'DirectionsRenderer'(JMVCObject)
+  JDirectionsRenderer = class external 'google.maps.DirectionsRenderer'(JMVCObject)
     constructor Create(opts: JDirectionsRendererOptions);
     function getDirections: JDirectionsResult;
     function getMap: JMap;
@@ -1031,7 +1031,7 @@ type
     procedure setRouteIndex(routeIndex: Float);
   end;
 
-  JDirectionsService = class external 'DirectionsService'
+  JDirectionsService = class external 'google.maps.DirectionsService'
     procedure route(request: JDirectionsRequest; callback: procedure(result: JDirectionsResult; status: JDirectionsStatus));
   end;
 
@@ -1050,7 +1050,7 @@ type
     locations: array of JLatLng;
   end;
 
-  JElevationService = class external 'ElevationService'
+  JElevationService = class external 'google.maps.ElevationService'
     procedure getElevationAlongPath(request: JPathElevationRequest; callback: procedure(results: array of JElevationResult; status: JElevationStatus));
     procedure getElevationForLocations(request: JLocationElevationRequest; callback: procedure(results: array of JElevationResult; status: JElevationStatus));
   end;
@@ -1060,7 +1060,7 @@ type
     zoom: Float;
   end;
 
-  JMaxZoomService = class external 'MaxZoomService'
+  JMaxZoomService = class external 'google.maps.MaxZoomService'
     procedure getMaxZoomAtLatLng(latlng: JLatLng; callback: procedure(result: JMaxZoomResult)); overload;
     procedure getMaxZoomAtLatLng(latlng: JLatLngLiteral; callback: procedure(result: JMaxZoomResult)); overload;
   end;
@@ -1095,11 +1095,11 @@ type
     rows: array of JDistanceMatrixResponseRow;
   end;
 
-  JDistanceMatrixService = class external 'DistanceMatrixService'
+  JDistanceMatrixService = class external 'google.maps.DistanceMatrixService'
     procedure getDistanceMatrix(request: JDistanceMatrixRequest; callback: procedure(response: JDistanceMatrixResponse; status: JDistanceMatrixStatus));
   end;
 
-  JSaveWidget = class external 'SaveWidget'
+  JSaveWidget = class external 'google.maps.SaveWidget'
     constructor Create(container: JNode; opts: JSaveWidgetOptions);
     function getAttribution: JAttribution;
     function getPlace: JPlace;
@@ -1118,7 +1118,7 @@ type
     tileSize: JSize; // nullable
   end;
 
-  JImageMapType = class external 'ImageMapType'(JMVCObject)
+  JImageMapType = class external 'google.maps.ImageMapType'(JMVCObject)
     constructor Create(opts: JImageMapTypeOptions);
     function getOpacity: Float;
     function getTile(tileCoord: JPoint; zoom: Float; ownerDocument: JDocument): JElement;
@@ -1133,13 +1133,13 @@ type
     name: String; // nullable
   end;
 
-  JStyledMapType = class external 'StyledMapType'(JMVCObject)
+  JStyledMapType = class external 'google.maps.StyledMapType'(JMVCObject)
     constructor Create(styles: array of JMapTypeStyle; options: JStyledMapTypeOptions);
     function getTile(tileCoord: JPoint; zoom: Float; ownerDocument: JDocument): JElement;
     procedure releaseTile(tile: JElement);
   end;
 
-  JBicyclingLayer = class external 'BicyclingLayer'(JMVCObject)
+  JBicyclingLayer = class external 'google.maps.BicyclingLayer'(JMVCObject)
     constructor Create;
     function getMap: JMap;
     procedure setMap(map: JMap);
@@ -1192,7 +1192,7 @@ type
     suppressInfoWindows: Boolean; // nullable
   end;
 
-  JFusionTablesLayer = class external 'FusionTablesLayer'(JMVCObject)
+  JFusionTablesLayer = class external 'google.maps.FusionTablesLayer'(JMVCObject)
     constructor Create(options: JFusionTablesLayerOptions);
     function getMap: JMap;
     procedure setMap(map: JMap);
@@ -1223,7 +1223,7 @@ type
     snippet: String;
   end;
 
-  JKmlLayer = class external 'KmlLayer'(JMVCObject)
+  JKmlLayer = class external 'google.maps.KmlLayer'(JMVCObject)
     constructor Create(opts: JKmlLayerOptions);
     function getDefaultViewport: JLatLngBounds;
     function getMap: JMap;
@@ -1236,19 +1236,19 @@ type
     procedure setZIndez(zIndex: Float);
   end;
 
-  JTrafficLayer = class external 'TrafficLayer'(JMVCObject)
+  JTrafficLayer = class external 'google.maps.TrafficLayer'(JMVCObject)
     constructor Create;
     procedure getMap;
     procedure setMap(map: JMap);
   end;
 
-  JTransitLayer = class external 'TransitLayer'(JMVCObject)
+  JTransitLayer = class external 'google.maps.TransitLayer'(JMVCObject)
     constructor Create;
     procedure getMap;
     procedure setMap(map: JMap);
   end;
 
-  Jevent = class external 'event'
+  Jevent = class external 'google.maps.event'
     function addDomListener(instance: JObject; eventName: String; handler: procedure): JMapsEventListener; overload;
     function addDomListener(instance: JObject; eventName: String; handler: procedure; capture: Boolean): JMapsEventListener; overload;
     function addDomListenerOnce(instance: JObject; eventName: String; handler: procedure): JMapsEventListener; overload;
@@ -1299,13 +1299,13 @@ type
     latLng: JLatLng;
   end;
 
-  JDataPoint = class external 'Data.Point' (JDataGeometry)
+  JDataPoint = class external 'google.maps.Data.Point' (JDataGeometry)
     constructor Create(latLng: JLatLng); overload;
     constructor Create(latLng: JLatLngLiteral); overload;
     function get: JLatLng;
   end;
 
-  JDataMultiPoint = class external 'Data.MultiPoint' (JDataGeometry)
+  JDataMultiPoint = class external 'google.maps.Data.MultiPoint' (JDataGeometry)
     constructor Create(elements: array of JLatLng); overload;
     constructor Create(elements: array of JLatLngLiteral); overload;
     function getArray: array of JLatLng;
@@ -1313,7 +1313,7 @@ type
     function getLength: Float;
   end;
 
-  JDataLineString = class external 'Data.LineString'(JDataGeometry)
+  JDataLineString = class external 'google.maps.Data.LineString'(JDataGeometry)
     constructor Create(elements: array of JLatLng); overload;
     constructor Create(elements: array of JLatLngLiteral); overload;
     function getArray: array of JLatLng;
@@ -1321,7 +1321,7 @@ type
     function getLength: Float;
   end;
 
-  JDataMultiLineString = class external 'Data.MultiLineString'(JDataGeometry)
+  JDataMultiLineString = class external 'google.maps.Data.MultiLineString'(JDataGeometry)
     constructor Create(elements: array of JDataLineString); overload;
     constructor Create(elements: array of array of JLatLng); overload;
     constructor Create(elements: array of array of JLatLngLiteral); overload;
@@ -1330,7 +1330,7 @@ type
     function getLength: Float;
   end;
 
-  JDataLinearRing = class external 'Data.LinearRing'(JDataGeometry)
+  JDataLinearRing = class external 'google.maps.Data.LinearRing'(JDataGeometry)
     constructor Create(elements: array of JLatLng); overload;
     constructor Create(elements: array of JLatLngLiteral); overload;
     function getArray: array of JLatLng;
@@ -1338,7 +1338,7 @@ type
     function getLength: Float;
   end;
 
-  JDataPolygon = class external 'Data.Polygon'(JDataGeometry)
+  JDataPolygon = class external 'google.maps.Data.Polygon'(JDataGeometry)
     constructor Create(elements: array of JDataLinearRing); overload;
     constructor Create(elements: array of array of JLatLng); overload;
     constructor Create(elements: array of array of JLatLngLiteral); overload;
@@ -1347,7 +1347,7 @@ type
     function getLength: Float;
   end;
 
-  JDataMultiPolygon = class external 'Data.MultiPolygon'(JDataGeometry)
+  JDataMultiPolygon = class external 'google.maps.Data.MultiPolygon'(JDataGeometry)
     constructor Create(elements: array of JDataPolygon); overload;
     constructor Create(elements: array of JDataLinearRing); overload;
     constructor Create(elements: array of array of JLatLng); overload;
@@ -1357,7 +1357,7 @@ type
     function getLength: Float;
   end;
 
-  JDataGeometryCollection = class external 'Data.GeometryCollection'(JDataGeometry)
+  JDataGeometryCollection = class external 'google.maps.Data.GeometryCollection'(JDataGeometry)
     constructor Create(elements: array of array of JDataGeometry); overload;
     constructor Create(elements: array of array of array of JLatLng); overload;
     constructor Create(elements: array of array of array of JLatLngLiteral); overload;
@@ -1402,12 +1402,12 @@ type
 //geometry
 
 type
-  Jencoding = class external 'encoding'
+  Jencoding = class external 'google.maps.encoding'
     function decodePath(encodedPath: String): array of JLatLng;
     function encodePath(path: array of Variant): String;
   end;
 
-  Jspherical = class external 'spherical'
+  Jspherical = class external 'google.maps.spherical'
     function computeArea(path: array of Variant): Float; overload;
     function computeArea(path: array of Variant; radius: Float): Float; overload;
     function computeDistanceBetween(from: JLatLng; to: JLatLng): Float; overload;
@@ -1424,7 +1424,7 @@ type
     function interpolate(from: JLatLng; to: JLatLng; fraction: Float): JLatLng;
   end;
 
-  Jpoly = class external 'poly'
+  Jpoly = class external 'google.maps.poly'
     function containsLocation(point: JLatLng; polygon: JPolygon): Boolean;
     function isLocationOnEdge(point: JLatLng; poly: JPolygon): Boolean; overload;
     function isLocationOnEdge(point: JLatLng; poly: JPolyline): Boolean; overload;
@@ -1446,7 +1446,7 @@ type
     urlColor: String; // nullable
   end;
 
-  JAdUnit = class external 'adsense.AdUnit'(JMVCObject)
+  JAdUnit = class external 'google.maps.adsense.AdUnit'(JMVCObject)
     constructor Create(container: JElement; opts: JAdUnitOptions);
     function getBackgroundColor: String;
     function getBorderColor: String;
@@ -1536,7 +1536,7 @@ type
     website: String;
   end;
 
-  JAutocomplete = class external 'places.Autocomplete'(JMVCObject)
+  JAutocomplete = class external 'google.maps.places.Autocomplete'(JMVCObject)
     constructor Create(inputField: JHTMLInputElement; opts: JAutocompleteOptions);
     function getBounds: JLatLngBounds;
     function getPlace: JPlaceResult;
@@ -1588,7 +1588,7 @@ type
     terms: array of JPredictionTerm;
   end;
 
-  JAutocompleteService = class external 'places.AutocompleteService'
+  JAutocompleteService = class external 'google.maps.places.AutocompleteService'
     constructor Create;
     procedure getPlacePredictions(request: JAutocompletionRequest; callback: procedure(result: array of JAutocompletePrediction; status: JPlacesServiceStatus));
     procedure getQueryPredictions(request: JQueryAutocompletionRequest; callback: procedure(result: array of JQueryAutocompletePrediction; status: JPlacesServiceStatus));
@@ -1640,7 +1640,7 @@ type
   TPlacesServiceGetDetailsCallback = procedure(result: JPlaceResult; status: JPlacesServiceStatus);
   TPlacesServiceNearbySearchCallback = procedure(results: array of JPlaceResult; status: JPlacesServiceStatus; pagination: JPlaceSearchPagination);
   TPlacesServiceSearchCallback = procedure(results: array of JPlaceResult; status: JPlacesServiceStatus);
-  JPlacesService = class external 'places.PlacesService'
+  JPlacesService = class external 'google.maps.places.PlacesService'
     constructor Create(attrContainer: JHTMLDivElement); overload;
     constructor Create(attrContainer: JMap); overload;
     procedure getDetails(request: JPlaceDetailsRequest; callback: TPlacesServiceGetDetailsCallback);
@@ -1649,7 +1649,7 @@ type
     procedure textSearch(request: JTextSearchRequest; callback: TPlacesServiceSearchCallback);
   end;
 
-  JSearchBox = class external 'places.SearchBox' (JMVCObject)
+  JSearchBox = class external 'google.maps.places.SearchBox' (JMVCObject)
     constructor Create(inputField: JHTMLInputElement; opts: JSearchBoxOptions);
     function getBounds: JLatLngBounds;
     function getPlaces: array of JPlaceResult;
@@ -1683,7 +1683,7 @@ type
     rectangleOptions: JRectangleOptions; // nullable
   end;
 
-  JDrawingManager = class external 'drawing.DrawingManager'(JMVCObject)
+  JDrawingManager = class external 'google.maps.drawing.DrawingManager'(JMVCObject)
     constructor Create(options: JDrawingManagerOptions);
     function getDrawingMode: JOverlayType;
     function getMap: JMap;
@@ -1709,7 +1709,7 @@ type
     name: String;
   end;
 
-  JMapsEngineLayer = class external 'visualization.MapsEngineLayer'(JMVCObject)
+  JMapsEngineLayer = class external 'google.maps.visualization.MapsEngineLayer'(JMVCObject)
     constructor Create(options: JMapsEngineLayerOptions);
     function getLayerId: String;
     function getLayerKey: String;
@@ -1743,7 +1743,7 @@ type
     weight: Float;
   end;
 
-  JHeatmapLayer = class external 'visualization.HeatmapLayer'(JMVCObject)
+  JHeatmapLayer = class external 'google.maps.visualization.HeatmapLayer'(JMVCObject)
     constructor Create(opts: JHeatmapLayerOptions);
     function getData: JMVCArray;
     function getMap: JMap;
@@ -1753,11 +1753,11 @@ type
     procedure setMap(map: JMap);
   end;
 
-  JVisualizationMouseEvent = class external 'visualization.MouseEvent'
+  JVisualizationMouseEvent = class external 'google.maps.visualization.MouseEvent'
     procedure stop;
   end;
 
-  JVisualizationMapsEventListener = class external 'visualization.MapsEventListener'
+  JVisualizationMapsEventListener = class external 'google.maps.visualization.MapsEventListener'
   end;
 
   JMapsEngineMouseEvent = class external
