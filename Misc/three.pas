@@ -3,13 +3,12 @@ unit Three;
 interface
 
 uses
-  W3C.TypedArray;
+  W3C.HTML5, W3C.TypedArray, W3C.Canvas2DContext, W3C.WebAudio, Khronos.WebGL;
 
 //THREE
 
 type
   JEuler = class;
-  JMatrix = class;
   JMatrix3 = class;
   JMatrix4 = class;
   JQuaternion = class;
@@ -29,6 +28,32 @@ type
   JPlane = class;
   JMaterial = class;
   JLoader = class;
+  JLoadingManager = class;
+  JMapping = Variant;
+  JWrapping = Variant;
+  JTextureFilter = Variant;
+  JPixelFormat = Variant;
+  JTextureDataType = Variant;
+  JSide = Variant;
+  JBlending = Variant;
+  JBlendingDstFactor = Variant;
+  JBlendingSrcFactor = Variant;
+  JBlendingEquation = Variant;
+  JDepthModes = Variant;
+  JColors = Variant;
+  JCombine = Variant;
+  JShading = Variant;
+  JShadowMapType = Variant;
+  JCullFace = Variant;
+  JFrontFaceDirection = Variant;
+  JPathActions = Variant;
+  JPixelType = Variant;
+  JCompressedPixelFormat = Variant;
+  JAnimationActionLoopStyles = Variant;
+  JLineMode = Variant;
+  JShape = class;
+  JExtrudeGeometry = class;
+  JShapeGeometry = class;
 
   JHSL = class external
     h: Float;
@@ -36,7 +61,60 @@ type
     l: Float;
   end;
 
-  JVector2 = class external 'Vector2'
+  JMath = class external
+    function generateUUID: String;
+    function clamp(value, min, max: Float): Float;
+    function euclideanModulo(n, m: Float): Float;
+    function mapLinear(x, a1, a2, b1, b2: Float): Float;
+    function smoothstep(x, min, max: Float): Float;
+    function smootherstep(x, min, max: Float): Float;
+    function random16: Float;
+    function randInt(_low, _high: Integer): Integer;
+    function randFloat(_low, _high: Float): Float;
+    function randFloatSpread(range: Float): Float;
+    function degToRad(degrees: Float): Float;
+    function radToDeg(radians: Float): Float;
+    function isPowerOfTwo(value: Float): Boolean;
+    function nearestPowerOfTwo(value: Float): Float;
+    function nextPowerOfTwo(value: Float): Float;
+  end;
+
+  JVector = class external
+    procedure setComponent(index: Integer; value: Float);
+    function getComponent(index: Integer): Float;
+    function copy(v: JVector): JVector;
+    function add(v: JVector): JVector;
+    function addVectors(a: JVector; b: JVector): JVector;
+    function sub(v: JVector): JVector;
+    function subVectors(a: JVector; b: JVector): JVector;
+    function multiplyScalar(s: Float): JVector;
+    function divideScalar(s: Float): JVector;
+    function negate: JVector;
+    function dot(v: JVector): Float;
+    function lengthSq: Float;
+    function length: Float;
+    function normalize: JVector;
+    function distanceTo(v: JVector): Float;
+    function distanceToSquared(v: JVector): Float;
+    function setLength(l: Float): JVector;
+    function lerp(v: JVector; alpha: Float): JVector;
+    function equals(v: JVector): Boolean;
+    function clone: JVector;
+  end;
+
+  JMatrix = class external
+    elements: JFloat32Array;
+    function identity: JMatrix;
+    function copy(m: JMatrix): JMatrix;
+    function multiplyScalar(s: Float): JMatrix;
+    function determinant: Float;
+    function getInverse(matrix: JMatrix): JMatrix; overload;
+    function getInverse(matrix: JMatrix; throwOnInvertible: Boolean): JMatrix; overload;
+    function transpose: JMatrix;
+    function clone: JMatrix;
+  end;
+
+  JVector2 = class external 'three.Vector2' (JVector)
     constructor Create(x: Float; y: Float);
     x: Float;
     y: Float;
@@ -90,7 +168,7 @@ type
     function rotateAround(center: JVector2; angle: Float): JVector2;
   end;
 
-  JVector3 = class external 'Vector3'
+  JVector3 = class external 'three.Vector3' (JVector)
     constructor Create(x: Float; y: Float; z: Float);
     x: Float;
     y: Float;
@@ -163,7 +241,7 @@ type
     function fromAttribute(attribute: JBufferAttribute; index: Integer; offset: Float): JVector3; overload;
   end;
 
-  JVector4 = class external 'Vector4'
+  JVector4 = class external 'three.Vector4' (JVector)
     constructor Create(x: Float; y: Float; z: Float; w: Float);
     x: Float;
     y: Float;
@@ -217,7 +295,7 @@ type
     function fromAttribute(attribute: JBufferAttribute; index: Integer; offset: Float): JVector4; overload;
   end;
 
-  JMatrix3 = class external 'Matrix3'
+  JMatrix3 = class external 'three.Matrix3'
     constructor Create; overload;
     constructor Create(n11, n12, n13, n21, n22, n23, n31, n32, n33: Float); overload;
     elements: JFloat32Array;
@@ -245,7 +323,7 @@ type
     function toArray: array of Float;
   end;
 
-  JMatrix4 = class external 'Matrix4'
+  JMatrix4 = class external 'three.Matrix4'
     constructor Create(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44: Float);
     elements: JFloat32Array;
     function set(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44: Float): JMatrix4;
@@ -296,7 +374,7 @@ type
     function toArray: array of Float;
   end;
 
-  JColor = class external 'Color'
+  JColor = class external 'three.Color'
     constructor Create(color: JColor); overload;
     constructor Create(color: String); overload;
     constructor Create(color: Float); overload;
@@ -338,7 +416,7 @@ type
     function toArray(&array: array of Float; offset: Float): array of Float; overload;
   end;
 
-  JColorKeywords = class external 'ColorKeywords'
+  JColorKeywords = class external 'three.ColorKeywords'
     aliceblue: Float;
     antiquewhite: Float;
     aqua: Float;
@@ -488,7 +566,7 @@ type
     yellowgreen: Float;
   end;
 
-  JEuler = class external 'Euler'
+  JEuler = class external 'three.Euler'
     constructor Create(x: Float; y: Float; z: Float; order: String);
     x: Float;
     y: Float;
@@ -532,7 +610,7 @@ type
     normals: array of JVector3;
   end;
 
-  JKeyframeTrack = class external 'KeyframeTrack'
+  JKeyframeTrack = class external 'three.KeyframeTrack'
     constructor Create(name: String; keys: array of Variant);
     name: String;
     keys: array of Variant;
@@ -548,7 +626,7 @@ type
     function GetTrackTypeForTypeName(typeName: String): Variant;
   end;
 
-  JPropertyBinding = class external 'PropertyBinding'
+  JPropertyBinding = class external 'three.PropertyBinding'
     constructor Create(rootNode: Variant; trackName: String);
     rootNode: Variant;
     trackName: String;
@@ -572,7 +650,7 @@ type
     function findNode(root: Variant; nodeName: String): Variant;
   end;
 
-  JBooleanKeyframeTrack = class external 'BooleanKeyframeTrack'(JKeyframeTrack)
+  JBooleanKeyframeTrack = class external 'three.BooleanKeyframeTrack'(JKeyframeTrack)
     constructor Create(name: String; keys: array of Variant);
     result: Variant;
     procedure setResult(value: Variant);
@@ -582,7 +660,7 @@ type
     function parse(json: Variant): JBooleanKeyframeTrack;
   end;
 
-  JColorKeyframeTrack = class external 'ColorKeyframeTrack'(JKeyframeTrack)
+  JColorKeyframeTrack = class external 'three.ColorKeyframeTrack'(JKeyframeTrack)
     constructor Create(name: String; keys: array of Variant);
     result: Variant;
     procedure setResult(value: Variant);
@@ -592,7 +670,7 @@ type
     function parse(json: Variant): JColorKeyframeTrack;
   end;
 
-  JNumberKeyframeTrack = class external 'NumberKeyframeTrack'
+  JNumberKeyframeTrack = class external 'three.NumberKeyframeTrack'
     constructor Create;
     result: Variant;
     procedure setResult(value: Variant);
@@ -602,7 +680,7 @@ type
     function parse(json: Variant): JNumberKeyframeTrack;
   end;
 
-  JQuaternionKeyframeTrack = class external 'QuaternionKeyframeTrack'
+  JQuaternionKeyframeTrack = class external 'three.QuaternionKeyframeTrack'
     constructor Create;
     result: Variant;
     procedure setResult(value: Variant);
@@ -612,7 +690,7 @@ type
     function parse(json: Variant): JQuaternionKeyframeTrack;
   end;
 
-  JStringKeyframeTrack = class external 'StringKeyframeTrack'
+  JStringKeyframeTrack = class external 'three.StringKeyframeTrack'
     constructor Create;
     result: Variant;
     procedure setResult(value: Variant);
@@ -622,7 +700,7 @@ type
     function parse(json: Variant): JStringKeyframeTrack;
   end;
 
-  JVectorKeyframeTrack = class external 'VectorKeyframeTrack'
+  JVectorKeyframeTrack = class external 'three.VectorKeyframeTrack'
     constructor Create;
     result: Variant;
     procedure setResult(value: Variant);
@@ -632,7 +710,7 @@ type
     function parse(json: Variant): JVectorKeyframeTrack;
   end;
 
-  JChannels = class external 'Channels'
+  JChannels = class external 'three.Channels'
     constructor Create;
     mask: Float;
     procedure set(channel: Float);
@@ -641,7 +719,7 @@ type
     procedure disable(channel: Float);
   end;
 
-  JObject3D = class external 'Object3D'
+  JObject3D = class external 'three.Object3D'
     constructor Create;
     id: Float;
     uuid: String;
@@ -728,7 +806,7 @@ type
     end);
   end;
 
-  JCamera = class external 'Camera'(JObject3D)
+  JCamera = class external 'three.Camera'(JObject3D)
     constructor Create;
     matrixWorldInverse: JMatrix4;
     projectionMatrix: JMatrix4;
@@ -740,13 +818,13 @@ type
     function copy(camera: JCamera): JCamera; overload;
   end;
 
-  JCubeCamera = class external 'CubeCamera'(JObject3D)
+  JCubeCamera = class external 'three.CubeCamera'(JObject3D)
     constructor Create(near: Float; far: Float; cubeResolution: Float);
     renderTarget: JWebGLRenderTargetCube;
     procedure updateCubeMap(renderer: JRenderer; scene: JScene);
   end;
 
-  JOrthographicCamera = class external 'OrthographicCamera'(JCamera)
+  JOrthographicCamera = class external 'three.OrthographicCamera'(JCamera)
     constructor Create(left: Float; right: Float; top: Float; bottom: Float; near: Float; far: Float);
     zoom: Float;
     left: Float;
@@ -762,7 +840,7 @@ type
     function toJSON(meta: Variant): Variant; overload;
   end;
 
-  JPerspectiveCamera = class external 'PerspectiveCamera'(JCamera)
+  JPerspectiveCamera = class external 'three.PerspectiveCamera'(JCamera)
     constructor Create(fov: Float; aspect: Float; near: Float; far: Float);
     zoom: Float;
     fov: Float;
@@ -779,7 +857,7 @@ type
     function toJSON(meta: Variant): Variant; overload;
   end;
 
-  JBufferAttribute = class external 'BufferAttribute'
+  JBufferAttribute = class external 'three.BufferAttribute'
     //TODO: constructor Create(&array: JArrayLike{<Float>}; itemSize: Float);
     uuid: String;
     //TODO: &array: JArrayLike{<Float>};
@@ -838,7 +916,7 @@ type
     function setXYZW(index: Integer; x: Float; y: Float; z: Float; w: Float): JBufferAttribute;
   end;
 
-  JAnimationClip = class external 'THREE.AnimationClip'
+  JAnimationClip = class external 'three.AnimationClip'
     constructor Create(name: String; duration: Float; tracks: array of JKeyframeTrack);
     name: String;
     tracks: array of JKeyframeTrack;
@@ -854,14 +932,14 @@ type
     function parseAnimation(animation: Variant; bones: array of JBone; nodeName: String): JAnimationClip;
   end;
 
-  JAnimationAction = class external 'THREE.AnimationAction'
+  JAnimationAction = class external 'three.AnimationAction'
     constructor Create(clip: JAnimationClip; startTime: Float; timeScale: Float; weight: Float; loop: Boolean);
     clip: JAnimationClip;
     localRoot: JMesh;
     startTime: Float;
     timeScale: Float;
     weight: Float;
-    // TODO: loop: JAnimationActionLoopStyles;
+    loop: JAnimationActionLoopStyles;
     loopCount: Float;
     enabled: Boolean;
     actionTime: Float;
@@ -877,7 +955,7 @@ type
     function getWeightAt(time: Float): Float;
   end;
 
-  JAnimationMixer = class external 'THREE.AnimationMixer'
+  JAnimationMixer = class external 'three.AnimationMixer'
     constructor Create(root: Variant);
     root: Variant;
     time: Float;
@@ -897,39 +975,39 @@ type
     function update(deltaTime: Float): JAnimationMixer;
   end;
 
-  JInt8Attribute = class external 'Int8Attribute'(JBufferAttribute)
+  JInt8Attribute = class external 'three.Int8Attribute'(JBufferAttribute)
     constructor Create(&array: Variant; itemSize: Float);
   end;
 
-  JUint8Attribute = class external 'Uint8Attribute'(JBufferAttribute)
+  JUint8Attribute = class external 'three.Uint8Attribute'(JBufferAttribute)
     constructor Create(&array: Variant; itemSize: Float);
   end;
 
-  JUint8ClampedAttribute = class external 'Uint8ClampedAttribute'(JBufferAttribute)
+  JUint8ClampedAttribute = class external 'three.Uint8ClampedAttribute'(JBufferAttribute)
     constructor Create(&array: Variant; itemSize: Float);
   end;
 
-  JInt16Attribute = class external 'Int16Attribute'(JBufferAttribute)
+  JInt16Attribute = class external 'three.Int16Attribute'(JBufferAttribute)
     constructor Create(&array: Variant; itemSize: Float);
   end;
 
-  JUint16Attribute = class external 'Uint16Attribute'(JBufferAttribute)
+  JUint16Attribute = class external 'three.Uint16Attribute'(JBufferAttribute)
     constructor Create(&array: Variant; itemSize: Float);
   end;
 
-  JInt32Attribute = class external 'Int32Attribute'(JBufferAttribute)
+  JInt32Attribute = class external 'three.Int32Attribute'(JBufferAttribute)
     constructor Create(&array: Variant; itemSize: Float);
   end;
 
-  JUint32Attribute = class external 'Uint32Attribute'(JBufferAttribute)
+  JUint32Attribute = class external 'three.Uint32Attribute'(JBufferAttribute)
     constructor Create(&array: Variant; itemSize: Float);
   end;
 
-  JFloat32Attribute = class external 'Float32Attribute'(JBufferAttribute)
+  JFloat32Attribute = class external 'three.Float32Attribute'(JBufferAttribute)
     constructor Create(&array: Variant; itemSize: Float);
   end;
 
-  JFloat64Attribute = class external 'Float64Attribute'(JBufferAttribute)
+  JFloat64Attribute = class external 'three.Float64Attribute'(JBufferAttribute)
     constructor Create(&array: Variant; itemSize: Float);
   end;
 
@@ -937,7 +1015,7 @@ type
     radius: Float;
   end;
 
-  JDirectGeometry = class external 'DirectGeometry'
+  JDirectGeometry = class external 'three.DirectGeometry'
     constructor Create;
     id: Float;
     uuid: String;
@@ -977,7 +1055,7 @@ type
     end);
   end;
 
-  JBufferGeometry = class external 'BufferGeometry'
+  JBufferGeometry = class external 'three.BufferGeometry'
     constructor Create;
     Maxindex: Integer;
     id: Float;
@@ -1047,7 +1125,7 @@ type
     end);
   end;
 
-  JClock = class external 'Clock'
+  JClock = class external 'three.Clock'
     constructor Create(autoStart: Boolean);
     autoStart: Boolean;
     startTime: Float;
@@ -1060,7 +1138,7 @@ type
     function getDelta: Float;
   end;
 
-  JEventDispatcher = class external 'EventDispatcher'
+  JEventDispatcher = class external 'three.EventDispatcher'
     constructor Create;
     procedure addEventListener(&type: String; listener: procedure(event: Variant));
     procedure hasEventListener(&type: String; listener: procedure(event: Variant));
@@ -1071,7 +1149,7 @@ type
     end);
   end;
 
-  JFace3 = class external 'Face3'
+  JFace3 = class external 'three.Face3'
     constructor Create(a, b, c: Float; normal: JVector3; color: JColor; materialindex: Integer); overload;
     constructor Create(a, b, c: Float; normal: JVector3; vertexColors: array of JColor; materialindex: Integer); overload;
     constructor Create(a, b, c: Float; vertexNormals: array of JVector3; color: JColor; materialindex: Integer); overload;
@@ -1088,7 +1166,7 @@ type
     function clone: JFace3;
   end;
 
-  JGeometry = class external 'Geometry'
+  JGeometry = class external 'three.Geometry'
     constructor Create;
     id: Float;
     uuid: String;
@@ -1150,14 +1228,14 @@ type
     end);
   end;
 
-  JInstancedBufferAttribute = class external 'InstancedBufferAttribute'(JBufferAttribute)
+  JInstancedBufferAttribute = class external 'three.InstancedBufferAttribute'(JBufferAttribute)
     // TODO: constructor Create(data: JArrayLike{<Float>}; itemSize: Float; meshPerAttribute: Float);
     meshPerAttribute: Float;
     function clone: JInstancedBufferAttribute;
     function copy(source: JInstancedBufferAttribute): JInstancedBufferAttribute;
   end;
 
-  JInstancedBufferGeometry = class external 'InstancedBufferGeometry'(JBufferGeometry)
+  JInstancedBufferGeometry = class external 'three.InstancedBufferGeometry'(JBufferGeometry)
     constructor Create;
     groups: array of record
       start: Float;
@@ -1169,7 +1247,7 @@ type
     function copy(source: JInstancedBufferGeometry): JInstancedBufferGeometry;
   end;
 
-  JInterleavedBufferAttribute = class external 'InterleavedBufferAttribute'
+  JInterleavedBufferAttribute = class external 'three.InterleavedBufferAttribute'
     constructor Create(interleavedBuffer: JInterleavedBuffer; itemSize: Float; offset: Float);
     uuid: String;
     data: JInterleavedBuffer;
@@ -1190,7 +1268,7 @@ type
     function setXYZW(index: Integer; x: Float; y: Float; z: Float; w: Float): JInterleavedBufferAttribute;
   end;
 
-  JInterleavedBuffer = class external 'InterleavedBuffer'
+  JInterleavedBuffer = class external 'three.InterleavedBuffer'
     // TODO: constructor Create(&array: JArrayLike{<Float>}; stride: Float);
     // TODO: &array: JArrayLike{<Float>};
     stride: Float;
@@ -1210,14 +1288,14 @@ type
     //TODO: function set(value: JArrayLike{<Float>}; index: Integer): JInterleavedBuffer;
   end;
 
-  JInstancedInterleavedBuffer = class external 'InstancedInterleavedBuffer'(JInterleavedBuffer)
+  JInstancedInterleavedBuffer = class external 'three.InstancedInterleavedBuffer'(JInterleavedBuffer)
     //TODO: constructor Create(&array: JArrayLike{<Float>}; stride: Float; meshPerAttribute: Float);
     meshPerAttribute: Float;
     function clone: JInstancedInterleavedBuffer;
     function copy(source: JInstancedInterleavedBuffer): JInstancedInterleavedBuffer;
   end;
 
-  JRay = class external 'Ray'
+  JRay = class external 'three.Ray'
     constructor Create(origin: JVector3; direction: JVector3);
     origin: JVector3;
     direction: JVector3;
@@ -1270,7 +1348,7 @@ type
     &object: JObject3D;
   end;
 
-  JRaycaster = class external 'Raycaster'
+  JRaycaster = class external 'three.Raycaster'
     constructor Create(origin: JVector3; direction: JVector3; near: Float; far: Float);
     ray: JRay;
     near: Float;
@@ -1289,7 +1367,7 @@ type
     function intersectObjects(objects: array of JObject3D; recursive: Boolean): array of JIntersection; overload;
   end;
 
-  JLight = class external 'Light'(JObject3D)
+  JLight = class external 'three.Light'(JObject3D)
     constructor Create(hex: Variant {Float or String});
     color: JColor;
     receiveShadow: Boolean;
@@ -1310,7 +1388,7 @@ type
     function toJSON(meta: Variant): Variant;
   end;
 
-  JLightShadow = class external 'LightShadow'
+  JLightShadow = class external 'three.LightShadow'
     constructor Create(camera: JCamera);
     camera: JCamera;
     bias: Float;
@@ -1322,14 +1400,14 @@ type
     function clone: JLightShadow;
   end;
 
-  JAmbientLight = class external 'AmbientLight'(JLight)
+  JAmbientLight = class external 'three.AmbientLight'(JLight)
     constructor Create(hex: Variant {Float or String});
     function clone: JAmbientLight; overload;
     function clone(recursive: Boolean): JAmbientLight; overload;
     function copy(source: JAmbientLight): JAmbientLight;
   end;
 
-  JDirectionalLight = class external 'DirectionalLight'(JLight)
+  JDirectionalLight = class external 'three.DirectionalLight'(JLight)
     constructor Create(hex: Variant {Float or String}; intensity: Float);
     target: JObject3D;
     intensity: Float;
@@ -1339,7 +1417,7 @@ type
     function copy(source: JDirectionalLight): JDirectionalLight;
   end;
 
-  JHemisphereLight = class external 'HemisphereLight'(JLight)
+  JHemisphereLight = class external 'three.HemisphereLight'(JLight)
     constructor Create(skyColorHex: Variant {Float or String}; groundColorHex: Variant {Float or String}; intensity: Float);
     groundColor: JColor;
     intensity: Float;
@@ -1348,7 +1426,7 @@ type
     function copy(source: JHemisphereLight): JHemisphereLight;
   end;
 
-  JPointLight = class external 'PointLight'(JLight)
+  JPointLight = class external 'three.PointLight'(JLight)
     constructor Create(hex: Variant {Float or String}; intensity: Float; distance: Float; decay: Float);
     intensity: Float;
     distance: Float;
@@ -1359,7 +1437,7 @@ type
     function copy(source: JPointLight): JPointLight;
   end;
 
-  JSpotLight = class external 'SpotLight'(JLight)
+  JSpotLight = class external 'three.SpotLight'(JLight)
     constructor Create(hex: Variant {Float or String}; intensity: Float; distance: Float; angle: Float; exponent: Float; decay: Float);
     target: JObject3D;
     intensity: Float;
@@ -1388,7 +1466,7 @@ type
     procedure clear;
   end;
 
-  JLoader = class external 'Loader'
+  JLoader = class external 'three.Loader'
     constructor Create;
     onLoadStart: procedure;
     onLoadProgress: procedure;
@@ -1401,55 +1479,136 @@ type
     Handlers: JLoaderHandler;
   end;
 
-  JAnimationLoader = class external 'AnimationLoader'
+  JAnimationLoader = class external 'three.AnimationLoader'
     constructor Create(manager: JLoadingManager);
     manager: JLoadingManager;
     procedure load(url: String; onLoad: procedure(animations: array of JAnimationClip)); overload;
     procedure load(url: String; onLoad: procedure(animations: array of JAnimationClip); onProgress: procedure(event: Variant)); overload;
     procedure load(url: String; onLoad: procedure(animations: array of JAnimationClip); onProgress: procedure(event: Variant); onError: procedure(event: Variant)); overload;
-    procedure setCrossOrigin(crossOrigin: String)
-    procedure parse(json: Variant; onLoad: procedure(animations: array of JAnimationClip))
+    procedure setCrossOrigin(crossOrigin: String);
+    procedure parse(json: Variant; onLoad: procedure(animations: array of JAnimationClip));
   end;
 
-  JBinaryTextureLoader = class external 'BinaryTextureLoader'
+  JTexture = class external 'three.Texture'
+    constructor Create(image: Variant {JHTMLImageElement or JHTMLCanvasElement or JHTMLVideoElement}; mapping: JMapping; wrapS: JWrapping; wrapT: JWrapping; magFilter: JTextureFilter; minFilter: JTextureFilter; format: JPixelFormat; &type: JTextureDataType; anisotropy: Float);
+    id: Float;
+    uuid: String;
+    name: String;
+    sourceFile: String;
+    image: Variant;
+    mipmaps: array of JImageData;
+    mapping: JMapping;
+    wrapS: JWrapping;
+    wrapT: JWrapping;
+    magFilter: JTextureFilter;
+    minFilter: JTextureFilter;
+    anisotropy: Float;
+    format: JPixelFormat;
+    &type: JTextureDataType;
+    offset: JVector2;
+    &repeat: JVector2;
+    generateMipmaps: Boolean;
+    premultiplyAlpha: Boolean;
+    flipY: Boolean;
+    unpackAlignment: Float;
+    version: Float;
+    needsUpdate: Boolean;
+    onUpdate: procedure;
+    DEFAULT_IMAGE: Variant;
+    DEFAULT_MAPPING: Variant;
+    function clone: JTexture;
+    function copy(source: JTexture): JTexture;
+    function toJSON(meta: Variant): Variant;
+    procedure dispose;
+    procedure transformUv(uv: JVector);
+    procedure addEventListener(&type: String; listener: procedure(event: Variant));
+    procedure hasEventListener(&type: String; listener: procedure(event: Variant));
+    procedure removeEventListener(&type: String; listener: procedure(event: Variant));
+    procedure dispatchEvent(event: record
+      &type: String;
+      target: Variant;
+    end);
+  end;
+
+  JCanvasTexture = class external 'three.CanvasTexture'(JTexture)
+    constructor Create(canvas: Variant {JHTMLImageElement or JHTMLCanvasElement or JHTMLVideoElement}; mapping: JMapping; wrapS: JWrapping; wrapT: JWrapping; magFilter: JTextureFilter; minFilter: JTextureFilter; format: JPixelFormat; &type: JTextureDataType; anisotropy: Float);
+    needsUpdate: Boolean;
+  end;
+
+  JCompressedTexture = class external 'three.CompressedTexture'(JTexture)
+    constructor Create(mipmaps: array of JImageData; width: Float; height: Float; format: JPixelFormat; &type: JTextureDataType; mapping: JMapping; wrapS: JWrapping; wrapT: JWrapping; magFilter: JTextureFilter; minFilter: JTextureFilter; anisotropy: Float);
+    image: record
+      width: Float;
+      height: Float;
+    end;
+    mipmaps: array of JImageData;
+    flipY: Boolean;
+    generateMipmaps: Boolean;
+  end;
+
+  JCubeTexture = class external 'three.CubeTexture'(JTexture)
+    constructor Create(images: array of Variant; mapping: JMapping; wrapS: JWrapping; wrapT: JWrapping; magFilter: JTextureFilter; minFilter: JTextureFilter; format: JPixelFormat; &type: JTextureDataType; anisotropy: Float);
+    images: array of Variant;
+    function copy(source: JCubeTexture): JCubeTexture;
+  end;
+
+  JDataTexture = class external 'three.DataTexture'(JTexture)
+    constructor Create(data: JImageData; width: Float; height: Float; format: JPixelFormat; &type: JTextureDataType; mapping: JMapping; wrapS: JWrapping; wrapT: JWrapping; magFilter: JTextureFilter; minFilter: JTextureFilter; anisotropy: Float);
+    image: record
+      data: JImageData;
+      width: Float;
+      height: Float;
+    end;
+    magFilter: JTextureFilter;
+    minFilter: JTextureFilter;
+    flipY: Boolean;
+    generateMipmaps: Boolean;
+  end;
+
+  JVideoTexture = class external 'three.VideoTexture'(JTexture)
+    constructor Create(video: JHTMLVideoElement; mapping: JMapping; wrapS: JWrapping; wrapT: JWrapping; magFilter: JTextureFilter; minFilter: JTextureFilter; format: JPixelFormat; &type: JTextureDataType; anisotropy: Float);
+    generateMipmaps: Boolean;
+  end;
+
+  JBinaryTextureLoader = class external 'three.BinaryTextureLoader'
     constructor Create(manager: JLoadingManager);
     manager: JLoadingManager;
     procedure load(url: String; onLoad: procedure(dataTexture: JDataTexture)); overload;
     procedure load(url: String; onLoad: procedure(dataTexture: JDataTexture); onProgress: procedure(event: Variant)); overload;
     procedure load(url: String; onLoad: procedure(dataTexture: JDataTexture); onProgress: procedure(event: Variant); onError: procedure(event: Variant)); overload;
-    procedure setCrossOrigin(crossOrigin: String)
+    procedure setCrossOrigin(crossOrigin: String);
   end;
 
-  JBufferGeometryLoader = class external 'BufferGeometryLoader'
+  JBufferGeometryLoader = class external 'three.BufferGeometryLoader'
     constructor Create(manager: JLoadingManager);
     manager: JLoadingManager;
     procedure load(url: String; onLoad: procedure(bufferGeometry: JBufferGeometry)); overload;
     procedure load(url: String; onLoad: procedure(bufferGeometry: JBufferGeometry); onProgress: procedure(event: Variant)); overload;
     procedure load(url: String; onLoad: procedure(bufferGeometry: JBufferGeometry); onProgress: procedure(event: Variant); onError: procedure(event: Variant)); overload;
-    procedure setCrossOrigin(crossOrigin: String)
-    function parse(json: Variant): JBufferGeometry
+    procedure setCrossOrigin(crossOrigin: String);
+    function parse(json: Variant): JBufferGeometry;
   end;
 
-  JCompressedTextureLoader = class external 'CompressedTextureLoader'
+  JCompressedTextureLoader = class external 'three.CompressedTextureLoader'
     constructor Create(manager: JLoadingManager);
     manager: JLoadingManager;
     procedure load(url: String; onLoad: procedure(texture: JCompressedTexture)); overload;
     procedure load(url: String; onLoad: procedure(texture: JCompressedTexture); onProgress: procedure(event: Variant)); overload;
     procedure load(url: String; onLoad: procedure(texture: JCompressedTexture); onProgress: procedure(event: Variant); onError: procedure(event: Variant)); overload;
-    procedure setCrossOrigin(crossOrigin: String)
+    procedure setCrossOrigin(crossOrigin: String);
   end;
 
-  JCubeTextureLoader = class external 'CubeTextureLoader'
+  JCubeTextureLoader = class external 'three.CubeTextureLoader'
     constructor Create(manager: JLoadingManager);
     manager: JLoadingManager;
-    procedure load(urls: JArray{<String>}); overload;
-    procedure load(urls: JArray{<String>}; onLoad: procedure(texture: JCubeTexture)); overload;
-    procedure load(urls: JArray{<String>}; onLoad: procedure(texture: JCubeTexture); onProgress: procedure(event: Variant)); overload;
-    procedure load(urls: JArray{<String>}; onLoad: procedure(texture: JCubeTexture); onProgress: procedure(event: Variant); onError: procedure(event: Variant)); overload;
-    procedure setCrossOrigin(crossOrigin: String)
+    procedure load(urls: array of String); overload;
+    procedure load(urls: array of String; onLoad: procedure(texture: JCubeTexture)); overload;
+    procedure load(urls: array of String; onLoad: procedure(texture: JCubeTexture); onProgress: procedure(event: Variant)); overload;
+    procedure load(urls: array of String; onLoad: procedure(texture: JCubeTexture); onProgress: procedure(event: Variant); onError: procedure(event: Variant)); overload;
+    procedure setCrossOrigin(crossOrigin: String);
   end;
 
-  JImageLoader = class external 'ImageLoader'
+  JImageLoader = class external 'three.ImageLoader'
     constructor Create(manager: JLoadingManager);
     cache: JCache;
     manager: JLoadingManager;
@@ -1458,10 +1617,10 @@ type
     function load(url: String; onLoad: procedure(image: JHTMLImageElement)): JHTMLImageElement; overload;
     function load(url: String; onLoad: procedure(image: JHTMLImageElement); onProgress: procedure(event: Variant)): JHTMLImageElement; overload;
     function load(url: String; onLoad: procedure(image: JHTMLImageElement); onProgress: procedure(event: Variant); onError: procedure(event: Variant)): JHTMLImageElement; overload;
-    procedure setCrossOrigin(crossOrigin: String)
+    procedure setCrossOrigin(crossOrigin: String);
   end;
 
-  JJSONLoader = class external 'JSONLoader'(JLoader)
+  JJSONLoader = class external 'three.JSONLoader'(JLoader)
     constructor Create(manager: JLoadingManager);
     manager: JLoadingManager;
     withCredentials: Boolean;
@@ -1469,69 +1628,79 @@ type
     procedure load(url: String; onLoad: procedure(geometry: JGeometry; materials: array of JMaterial)); overload;
     procedure load(url: String; onLoad: procedure(geometry: JGeometry; materials: array of JMaterial); onProgress: procedure(event: Variant)); overload;
     procedure load(url: String; onLoad: procedure(geometry: JGeometry; materials: array of JMaterial); onProgress: procedure(event: Variant); onError: procedure(event: Variant)); overload;
-    procedure setCrossOrigin(crossOrigin: String)
-    procedure setTexturePath(value: String)
-    function parse(json: Variant):       geometry: JGeometry;
+    procedure setCrossOrigin(crossOrigin: String);
+    procedure setTexturePath(value: String);
+    function parse(json: Variant): record
+      geometry: JGeometry;
       materials: array of JMaterial; // nullable
     end; overload;
-    function parse(json: Variant; texturePath: String):       geometry: JGeometry;
+    function parse(json: Variant; texturePath: String): record
+      geometry: JGeometry;
       materials: array of JMaterial; // nullable
     end; overload;
   end;
 
-  JLoadingManager = class external 'LoadingManager'
-    constructor Create(onLoad: ; onProgress: (url: String; loaded: Float; total: Float); onError: );
-    onStart: ;
-    onLoad: ;
-    onProgress: (item: Variant; loaded: Float; total: Float);
-    onError: ;
-    procedure itemStart(url: String)
-    procedure itemEnd(url: String)
-    procedure itemError(url: String)
+  JLoadingManager = class external 'three.LoadingManager'
+    constructor Create(onLoad: procedure; onProgress: procedure(url: String; loaded: Float; total: Float); onError: procedure);
+    onStart: procedure;
+    onLoad: procedure;
+    onProgress: procedure(item: Variant; loaded: Float; total: Float);
+    onError: procedure;
+    procedure itemStart(url: String);
+    procedure itemEnd(url: String);
+    procedure itemError(url: String);
   end;
 
-  JMaterialLoader = class external 'MaterialLoader'
+  JMaterialLoader = class external 'three.MaterialLoader'
     constructor Create(manager: JLoadingManager);
     manager: JLoadingManager;
+(* TODO
     textures: record
       // property Item[key: String]: JTexture;
-    end;;
-    procedure load(url: String; onLoad: procedure(material: JMaterial))
-    procedure setCrossOrigin(crossOrigin: String)
+    end;
+*)
+    procedure load(url: String; onLoad: procedure(material: JMaterial));
+    procedure setCrossOrigin(crossOrigin: String);
+(* TODO
     procedure setTextures(textures: record
       // property Item[key: String]: JTexture;
     end;)
-    function getTexture(name: String): JTexture
-    function parse(json: Variant): JMaterial
+*)
+    function getTexture(name: String): JTexture;
+    function parse(json: Variant): JMaterial;
   end;
 
-  JObjectLoader = class external 'ObjectLoader'
+  JObjectLoader = class external 'three.ObjectLoader'
     constructor Create(manager: JLoadingManager);
     manager: JLoadingManager;
     texturePass: String;
     procedure load(url: String); overload;
     procedure load(url: String; onLoad: procedure(&object: JObject3D)); overload;
-    procedure setTexturePath(value: String)
-    procedure setCrossOrigin(crossOrigin: String)
+    procedure setTexturePath(value: String);
+    procedure setCrossOrigin(crossOrigin: String);
+(* TODO:
     function parse(json: Variant): JT; overload;
     function parse(json: Variant; onLoad: procedure(&object: JObject3D)): JT; overload;
-    function parseGeometries(json: Variant): array of Variant
-    function parseMaterials(json: Variant; textures: array of JTexture): array of JMaterial
-    function parseImages(json: Variant; onLoad: procedure): array of Variant
-    function parseTextures(json: Variant; images: Variant): array of JTexture
-    function parseObject(data: Variant; geometries: array of Variant; materials: array of JMaterial): JT
+*)
+    function parseGeometries(json: Variant): array of Variant;
+    function parseMaterials(json: Variant; textures: array of JTexture): array of JMaterial;
+    function parseImages(json: Variant; onLoad: procedure): array of Variant;
+    function parseTextures(json: Variant; images: Variant): array of JTexture;
+(* TODO:
+    function parseObject(data: Variant; geometries: array of Variant; materials: array of JMaterial): JT;
+*)
   end;
 
-  JTextureLoader = class external 'TextureLoader'
+  JTextureLoader = class external 'three.TextureLoader'
     constructor Create(manager: JLoadingManager);
     manager: JLoadingManager;
     crossOrigin: String;
     function load(url: String): JTexture; overload;
     function load(url: String; onLoad: procedure(texture: JTexture)): JTexture; overload;
-    procedure setCrossOrigin(crossOrigin: String)
+    procedure setCrossOrigin(crossOrigin: String);
   end;
 
-  JXHRLoader = class external 'XHRLoader'
+  JXHRLoader = class external 'three.XHRLoader'
     constructor Create(manager: JLoadingManager);
     cache: JCache;
     manager: JLoadingManager;
@@ -1541,12 +1710,12 @@ type
     function load(url: String; onLoad: procedure(responseText: String)): Variant; overload;
     function load(url: String; onLoad: procedure(responseText: String); onProgress: procedure(event: Variant)): Variant; overload;
     function load(url: String; onLoad: procedure(responseText: String); onProgress: procedure(event: Variant); onError: procedure(event: Variant)): Variant; overload;
-    procedure setResponseType(responseType: String)
-    procedure setCrossOrigin(crossOrigin: String)
-    procedure setWithCredentials(withCredentials: String)
+    procedure setResponseType(responseType: String);
+    procedure setCrossOrigin(crossOrigin: String);
+    procedure setWithCredentials(withCredentials: String);
   end;
 
-  JMaterial = class external 'Material'
+  JMaterial = class external 'three.Material'
     constructor Create;
     id: Float;
     uuid: String;
@@ -1574,1444 +1743,20 @@ type
     overdraw: Float;
     visible: Boolean;
     needsUpdate: Boolean;
-    procedure setValues(values: JObject)
+    procedure setValues(values: JObject);
     function toJSON: Variant; overload;
     function toJSON(meta: Variant): Variant; overload;
-    function clone: JMaterial
     function clone: JMaterial; overload;
     function clone(source: JMaterial): JMaterial; overload;
-    procedure update
-    procedure dispose
-    procedure addEventListener(&type: String; listener: procedure(event: Variant))
-    procedure hasEventListener(&type: String; listener: procedure(event: Variant))
-    procedure removeEventListener(&type: String; listener: procedure(event: Variant))
+    procedure update;
+    procedure dispose;
+    procedure addEventListener(&type: String; listener: procedure(event: Variant));
+    procedure hasEventListener(&type: String; listener: procedure(event: Variant));
+    procedure removeEventListener(&type: String; listener: procedure(event: Variant));
     procedure dispatchEvent(event: record
       &type: String;
       target: Variant;
-    end;)
-  end;
-
-  JLineBasicMaterial = class external 'LineBasicMaterial'(JMaterial)
-    constructor Create(parameters: JLineBasicMaterialParameters);
-    color: JColor;
-    linewidth: Float;
-    linecap: String;
-    linejoin: String;
-    vertexColors: JColors;
-    fog: Boolean;
-    function clone: JLineBasicMaterial
-    function copy(source: JLineBasicMaterial): JLineBasicMaterial
-  end;
-
-  JLineDashedMaterial = class external 'LineDashedMaterial'(JMaterial)
-    constructor Create(parameters: JLineDashedMaterialParameters);
-    color: JColor;
-    linewidth: Float;
-    scale: Float;
-    dashSize: Float;
-    gapSize: Float;
-    vertexColors: JColors;
-    fog: Boolean;
-    function clone: JLineDashedMaterial
-    function copy(source: JLineDashedMaterial): JLineDashedMaterial
-  end;
-
-  JMeshBasicMaterial = class external 'MeshBasicMaterial'(JMaterial)
-    constructor Create(parameters: JMeshBasicMaterialParameters);
-    color: JColor;
-    map: JTexture;
-    aoMap: JTexture;
-    aoMapIntensity: Float;
-    specularMap: JTexture;
-    alphaMap: JTexture;
-    envMap: JTexture;
-    combine: JCombine;
-    reflectivity: Float;
-    refractionRatio: Float;
-    fog: Boolean;
-    shading: JShading;
-    wireframe: Boolean;
-    wireframeLinewidth: Float;
-    wireframeLinecap: String;
-    wireframeLinejoin: String;
-    vertexColors: JColors;
-    skinning: Boolean;
-    morphTargets: Boolean;
-    function clone: JMeshBasicMaterial
-    function copy(source: JMeshBasicMaterial): JMeshBasicMaterial
-  end;
-
-  JMeshDepthMaterial = class external 'MeshDepthMaterial'(JMaterial)
-    constructor Create(parameters: JMeshDepthMaterialParameters);
-    wireframe: Boolean;
-    wireframeLinewidth: Float;
-    function clone: JMeshDepthMaterial
-    function copy(source: JMeshDepthMaterial): JMeshDepthMaterial
-  end;
-
-  JMeshLambertMaterial = class external 'MeshLambertMaterial'(JMaterial)
-    constructor Create(parameters: JMeshLambertMaterialParameters);
-    color: JColor;
-    emissive: JColor;
-    map: JTexture;
-    specularMap: JTexture;
-    alphaMap: JTexture;
-    envMap: JTexture;
-    combine: JCombine;
-    reflectivity: Float;
-    refractionRatio: Float;
-    fog: Boolean;
-    wireframe: Boolean;
-    wireframeLinewidth: Float;
-    wireframeLinecap: String;
-    wireframeLinejoin: String;
-    vertexColors: JColors;
-    skinning: Boolean;
-    morphTargets: Boolean;
-    morphNormals: Boolean;
-    function clone: JMeshLambertMaterial
-    function copy(source: JMeshLambertMaterial): JMeshLambertMaterial
-  end;
-
-  JMeshNormalMaterial = class external 'MeshNormalMaterial'(JMaterial)
-    constructor Create(parameters: JMeshNormalMaterialParameters);
-    wireframe: Boolean;
-    wireframeLinewidth: Float;
-    morphTargets: Boolean;
-    function clone: JMeshNormalMaterial
-    function copy(source: JMeshNormalMaterial): JMeshNormalMaterial
-  end;
-
-  JMeshPhongMaterial = class external 'MeshPhongMaterial'(JMaterial)
-    constructor Create(parameters: JMeshPhongMaterialParameters);
-    color: JColor;
-    emissive: JColor;
-    specular: JColor;
-    shininess: Float;
-    metal: Boolean;
-    map: JTexture;
-    lightMap: JTexture;
-    lightMapIntensity: Float;
-    aoMap: JTexture;
-    aoMapIntensity: Float;
-    emissiveMap: JTexture;
-    bumpMap: JTexture;
-    bumpScale: Float;
-    normalMap: JTexture;
-    normalScale: JVector2;
-    displacementMap: JTexture;
-    displacementScale: Float;
-    displacementBias: Float;
-    specularMap: JTexture;
-    alphaMap: JTexture;
-    envMap: JTexture;
-    combine: JCombine;
-    reflectivity: Float;
-    refractionRatio: Float;
-    fog: Boolean;
-    shading: JShading;
-    wireframe: Boolean;
-    wireframeLinewidth: Float;
-    wireframeLinecap: String;
-    wireframeLinejoin: String;
-    vertexColors: JColors;
-    skinning: Boolean;
-    morphTargets: Boolean;
-    morphNormals: Boolean;
-    function clone: JMeshPhongMaterial
-    function copy(source: JMeshPhongMaterial): JMeshPhongMaterial
-  end;
-
-  JMultiMaterial = class external 'MultiMaterial'(JMaterial)
-    constructor Create(materials: array of JMaterial);
-    materials: array of JMaterial;
-    function toJSON: Variant
-    function clone: JMultiMaterial
-  end;
-
-  JMeshFaceMaterial = class external 'MeshFaceMaterial'(JMultiMaterial)
-  end;
-
-  JPointsMaterial = class external 'PointsMaterial'(JMaterial)
-    constructor Create(parameters: JPointsMaterialParameters);
-    color: JColor;
-    map: JTexture;
-    size: Float;
-    sizeAttenuation: Boolean;
-    vertexColors: Boolean;
-    fog: Boolean;
-    function clone: JPointsMaterial
-    function copy(source: JPointsMaterial): JPointsMaterial
-  end;
-
-  JRawShaderMaterial = class external 'RawShaderMaterial'(JShaderMaterial)
-    constructor Create(parameters: JShaderMaterialParameters);
-  end;
-
-  JShaderMaterial = class external 'ShaderMaterial'(JMaterial)
-    constructor Create(parameters: JShaderMaterialParameters);
-    defines: Variant;
-    uniforms: Variant;
-    vertexShader: String;
-    fragmentShader: String;
-    shading: JShading;
-    linewidth: Float;
-    wireframe: Boolean;
-    wireframeLinewidth: Float;
-    fog: Boolean;
-    lights: Boolean;
-    vertexColors: JColors;
-    skinning: Boolean;
-    morphTargets: Boolean;
-    morphNormals: Boolean;
-    derivatives: Boolean;
-    defaultAttributeValues: Variant;
-    index0AttributeName: String;
-    function clone: JShaderMaterial
-    function copy(source: JShaderMaterial): JShaderMaterial
-    function toJSON(meta: Variant): Variant
-  end;
-
-  JSpriteMaterial = class external 'SpriteMaterial'(JMaterial)
-    constructor Create(parameters: JSpriteMaterialParameters);
-    color: JColor;
-    map: JTexture;
-    rotation: Float;
-    fog: Boolean;
-    function clone: JSpriteMaterial
-    function copy(source: JSpriteMaterial): JSpriteMaterial
-  end;
-
-  JBox2 = class external 'Box2'
-    constructor Create(min: JVector2; max: JVector2);
-    max: JVector2;
-    min: JVector2;
-    function set(min: JVector2; max: JVector2): JBox2
-    function setFromPoints(points: array of JVector2): JBox2
-    function setFromCenterAndSize(center: JVector2; size: JVector2): JBox2
-    function clone: JBox2
-    function copy(box: JBox2): JBox2
-    function makeEmpty: JBox2
-    function empty: Boolean
-    function center: JVector2; overload;
-    function center(optionalTarget: JVector2): JVector2; overload;
-    function size: JVector2; overload;
-    function size(optionalTarget: JVector2): JVector2; overload;
-    function expandByPoint(point: JVector2): JBox2
-    function expandByVector(vector: JVector2): JBox2
-    function expandByScalar(scalar: Float): JBox2
-    function containsPoint(point: JVector2): Boolean
-    function containsBox(box: JBox2): Boolean
-    function getParameter(point: JVector2): JVector2
-    function isIntersectionBox(box: JBox2): Boolean
-    function clampPoint(point: JVector2): JVector2; overload;
-    function clampPoint(point: JVector2; optionalTarget: JVector2): JVector2; overload;
-    function distanceToPoint(point: JVector2): Float
-    function intersect(box: JBox2): JBox2
-    function union(box: JBox2): JBox2
-    function translate(offset: JVector2): JBox2
-    function equals(box: JBox2): Boolean
-  end;
-
-  JBox3 = class external 'Box3'
-    constructor Create(min: JVector3; max: JVector3);
-    max: JVector3;
-    min: JVector3;
-    function set(min: JVector3; max: JVector3): JBox3
-    function setFromPoints(points: array of JVector3): JBox3
-    function setFromCenterAndSize(center: JVector3; size: JVector3): JBox3
-    function setFromObject(&object: JObject3D): JBox3
-    function clone: JBox3
-    function copy(box: JBox3): JBox3
-    function makeEmpty: JBox3
-    function empty: Boolean
-    function center: JVector3; overload;
-    function center(optionalTarget: JVector3): JVector3; overload;
-    function size: JVector3; overload;
-    function size(optionalTarget: JVector3): JVector3; overload;
-    function expandByPoint(point: JVector3): JBox3
-    function expandByVector(vector: JVector3): JBox3
-    function expandByScalar(scalar: Float): JBox3
-    function containsPoint(point: JVector3): Boolean
-    function containsBox(box: JBox3): Boolean
-    function getParameter(point: JVector3): JVector3
-    function isIntersectionBox(box: JBox3): Boolean
-    function clampPoint(point: JVector3): JVector3; overload;
-    function clampPoint(point: JVector3; optionalTarget: JVector3): JVector3; overload;
-    function distanceToPoint(point: JVector3): Float
-    function getBoundingSphere: JSphere; overload;
-    function getBoundingSphere(optionalTarget: JSphere): JSphere; overload;
-    function intersect(box: JBox3): JBox3
-    function union(box: JBox3): JBox3
-    function applyMatrix4(matrix: JMatrix4): JBox3
-    function translate(offset: JVector3): JBox3
-    function equals(box: JBox3): Boolean
-  end;
-
-  JFrustum = class external 'Frustum'
-    constructor Create(p0: JPlane; p1: JPlane; p2: JPlane; p3: JPlane; p4: JPlane; p5: JPlane);
-    planes: array of JPlane;
-    function set: JFrustum; overload;
-    function set(p0: Float): JFrustum; overload;
-    function set(p0: Float; p1: Float): JFrustum; overload;
-    function set(p0: Float; p1: Float; p2: Float): JFrustum; overload;
-    function set(p0: Float; p1: Float; p2: Float; p3: Float): JFrustum; overload;
-    function set(p0: Float; p1: Float; p2: Float; p3: Float; p4: Float): JFrustum; overload;
-    function set(p0: Float; p1: Float; p2: Float; p3: Float; p4: Float; p5: Float): JFrustum; overload;
-    function clone: JFrustum
-    function copy(frustum: JFrustum): JFrustum
-    function setFromMatrix(m: JMatrix4): JFrustum
-    function intersectsObject(&object: JObject3D): Boolean
-    function intersectsSphere(sphere: JSphere): Boolean
-    function intersectsBox(box: JBox3): Boolean
-    function containsPoint(point: JVector3): Boolean
-  end;
-
-  JLine3 = class external 'Line3'
-    constructor Create(start: JVector3; &end: JVector3);
-    start: JVector3;
-    &end: JVector3;
-    function set: JLine3; overload;
-    function set(start: JVector3): JLine3; overload;
-    function set(start: JVector3; &end: JVector3): JLine3; overload;
-    function clone: JLine3
-    function copy(line: JLine3): JLine3
-    function center: JVector3; overload;
-    function center(optionalTarget: JVector3): JVector3; overload;
-    function delta: JVector3; overload;
-    function delta(optionalTarget: JVector3): JVector3; overload;
-    function distanceSq: Float
-    function distance: Float
-    function at(t: Float): JVector3; overload;
-    function at(t: Float; optionalTarget: JVector3): JVector3; overload;
-    function closestPointToPointParameter(point: JVector3): Float; overload;
-    function closestPointToPointParameter(point: JVector3; clampToLine: Boolean): Float; overload;
-    function closestPointToPoint(point: JVector3): JVector3; overload;
-    function closestPointToPoint(point: JVector3; clampToLine: Boolean): JVector3; overload;
-    function closestPointToPoint(point: JVector3; clampToLine: Boolean; optionalTarget: JVector3): JVector3; overload;
-    function applyMatrix4(matrix: JMatrix4): JLine3
-    function equals(line: JLine3): Boolean
-  end;
-
-  JPlane = class external 'Plane'
-    constructor Create(normal: JVector3; constant: Float);
-    normal: JVector3;
-    constant: Float;
-    function set(normal: JVector3; constant: Float): JPlane
-    function setComponents(x: Float; y: Float; z: Float; w: Float): JPlane
-    function setFromNormalAndCoplanarPoint(normal: JVector3; point: JVector3): JPlane
-    function setFromCoplanarPoints(a: JVector3; b: JVector3; c: JVector3): JPlane
-    function clone: JPlane
-    function copy(plane: JPlane): JPlane
-    function normalize: JPlane
-    function negate: JPlane
-    function distanceToPoint(point: JVector3): Float
-    function distanceToSphere(sphere: JSphere): Float
-    function projectPoint(point: JVector3): JVector3; overload;
-    function projectPoint(point: JVector3; optionalTarget: JVector3): JVector3; overload;
-    function orthoPoint(point: JVector3): JVector3; overload;
-    function orthoPoint(point: JVector3; optionalTarget: JVector3): JVector3; overload;
-    function isIntersectionLine(line: JLine3): Boolean
-    function intersectLine(line: JLine3): JVector3; overload;
-    function intersectLine(line: JLine3; optionalTarget: JVector3): JVector3; overload;
-    function coplanarPoint: JVector3; overload;
-    function coplanarPoint(optionalTarget: Boolean): JVector3; overload;
-    function applyMatrix4(matrix: JMatrix4): JPlane; overload;
-    function applyMatrix4(matrix: JMatrix4; optionalNormalMatrix: JMatrix3): JPlane; overload;
-    function translate(offset: JVector3): JPlane
-    function equals(plane: JPlane): Boolean
-  end;
-
-  JQuaternion = class external 'Quaternion'
-    constructor Create(x: Float; y: Float; z: Float; w: Float);
-    x: Float;
-    y: Float;
-    z: Float;
-    w: Float;
-    function set(x: Float; y: Float; z: Float; w: Float): JQuaternion
-    function clone: JQuaternion
-    function copy(q: JQuaternion): JQuaternion
-    function setFromEuler(euler: JEuler): JQuaternion; overload;
-    function setFromEuler(euler: JEuler; update: Boolean): JQuaternion; overload;
-    function setFromAxisAngle(axis: JVector3; angle: Float): JQuaternion
-    function setFromRotationMatrix(m: JMatrix4): JQuaternion
-    function setFromUnitVectors(vFrom: JVector3; vTo: JVector3): JQuaternion
-    function inverse: JQuaternion
-    function conjugate: JQuaternion
-    function dot(v: JVector3): Float
-    function lengthSq: Float
-    function length: Float
-    function normalize: JQuaternion
-    function multiply(q: JQuaternion): JQuaternion
-    function multiplyQuaternions(a: JQuaternion; b: JQuaternion): JQuaternion
-    function multiplyVector3(vector: JVector3): JVector3
-    function slerp(qb: JQuaternion; t: Float): JQuaternion
-    function equals(v: JQuaternion): Boolean
-    function fromArray(n: array of Float): JQuaternion
-    function toArray: array of Float
-    function fromArray(xyzw: array of Float): JQuaternion; overload;
-    function fromArray(xyzw: array of Float; offset: Float): JQuaternion; overload;
-    function toArray: array of Float; overload;
-    function toArray(xyzw: array of Float): array of Float; overload;
-    function toArray(xyzw: array of Float; offset: Float): array of Float; overload;
-    onChange: ;
-    function slerp(qa: JQuaternion; qb: JQuaternion; qm: JQuaternion; t: Float): JQuaternion
-  end;
-
-  JSphere = class external 'Sphere'
-    constructor Create(center: JVector3; radius: Float);
-    center: JVector3;
-    radius: Float;
-    function set(center: JVector3; radius: Float): JSphere
-    function setFromPoints(points: array of JVector3): JSphere; overload;
-    function setFromPoints(points: array of JVector3; optionalCenter: JVector3): JSphere; overload;
-    function clone: JSphere
-    function copy(sphere: JSphere): JSphere
-    function empty: Boolean
-    function containsPoint(point: JVector3): Boolean
-    function distanceToPoint(point: JVector3): Float
-    function intersectsSphere(sphere: JSphere): Boolean
-    function clampPoint(point: JVector3): JVector3; overload;
-    function clampPoint(point: JVector3; optionalTarget: JVector3): JVector3; overload;
-    function getBoundingBox: JBox3; overload;
-    function getBoundingBox(optionalTarget: JBox3): JBox3; overload;
-    function applyMatrix4(matrix: JMatrix4): JSphere
-    function translate(offset: JVector3): JSphere
-    function equals(sphere: JSphere): Boolean
-  end;
-
-  JSpline = class external 'Spline'
-    constructor Create(points: array of JSplineControlPoint);
-    points: array of JSplineControlPoint;
-    procedure initFromArray(a: array of array of Float)
-    function getPoint(k: Float): JSplineControlPoint
-    function getControlPointsArray: array of array of Float
-    function getLength:       chunks: array of Float;
-      total: Float;
-    end; overload;
-    function getLength(nSubDivisions: Float):       chunks: array of Float;
-      total: Float;
-    end; overload;
-    procedure reparametrizeByArcLength(samplingCoef: Float)
-  end;
-
-  JTriangle = class external 'Triangle'
-    constructor Create(a: JVector3; b: JVector3; c: JVector3);
-    a: JVector3;
-    b: JVector3;
-    c: JVector3;
-    function set(a: JVector3; b: JVector3; c: JVector3): JTriangle
-    function setFromPointsAndIndices(points: array of JVector3; i0: Float; i1: Float; i2: Float): JTriangle
-    function clone: JTriangle
-    function copy(triangle: JTriangle): JTriangle
-    function area: Float
-    function midpoint: JVector3; overload;
-    function midpoint(optionalTarget: JVector3): JVector3; overload;
-    function normal: JVector3; overload;
-    function normal(optionalTarget: JVector3): JVector3; overload;
-    function plane: JPlane; overload;
-    function plane(optionalTarget: JVector3): JPlane; overload;
-    function barycoordFromPoint(point: JVector3): JVector3; overload;
-    function barycoordFromPoint(point: JVector3; optionalTarget: JVector3): JVector3; overload;
-    function containsPoint(point: JVector3): Boolean
-    function equals(triangle: JTriangle): Boolean
-    function normal(a: JVector3; b: JVector3; c: JVector3): JVector3; overload;
-    function normal(a: JVector3; b: JVector3; c: JVector3; optionalTarget: JVector3): JVector3; overload;
-    function barycoordFromPoint(point: JVector3; a: JVector3; b: JVector3; c: JVector3; optionalTarget: JVector3): JVector3
-    function containsPoint(point: JVector3; a: JVector3; b: JVector3; c: JVector3): Boolean
-  end;
-
-  JBone = class external 'Bone'(JObject3D)
-    constructor Create(skin: JSkinnedMesh);
-    skin: JSkinnedMesh;
-    function clone: JBone
-    function copy(source: JBone): JBone
-  end;
-
-  JGroup = class external 'Group'(JObject3D)
-    constructor Create;
-  end;
-
-  JLOD = class external 'LOD'(JObject3D)
-    constructor Create;
-    levels: array of Variant;
-    procedure addLevel(&object: JObject3D); overload;
-    procedure addLevel(&object: JObject3D; distance: Float); overload;
-    function getObjectForDistance(distance: Float): JObject3D
-    procedure raycast(raycaster: JRaycaster; intersects: Variant)
-    procedure update(camera: JCamera)
-    function clone: JLOD
-    function copy(source: JLOD): JLOD
-    function toJSON(meta: Variant): Variant
-  end;
-
-  JLensFlare = class external 'LensFlare'(JObject3D)
-    constructor Create(texture: JTexture; size: Float; distance: Float; blending: JBlending; color: JColor);
-    lensFlares: array of JLensFlareProperty;
-    positionScreen: JVector3;
-    customUpdateCallback: (&object: JLensFlare);
-    procedure add(texture: JTexture); overload;
-    procedure add(texture: JTexture; size: Float); overload;
-    procedure add(texture: JTexture; size: Float; distance: Float); overload;
-    procedure add(texture: JTexture; size: Float; distance: Float; blending: JBlending); overload;
-    procedure add(texture: JTexture; size: Float; distance: Float; blending: JBlending; color: JColor); overload;
-    procedure add(obj: JObject3D)
-    procedure updateLensFlares
-    function clone: JLensFlare
-    function copy(source: JLensFlare): JLensFlare
-  end;
-
-  JLine = class external 'Line'(JObject3D)
-    constructor Create(geometry: Variant {JGeometry or JBufferGeometry}; material: Variant {JLineDashedMaterial or JLineBasicMaterial or JShaderMaterial}; mode: Float);
-    geometry: Variant {JGeometry or JBufferGeometry};
-    material: JMaterial;
-    procedure raycast(raycaster: JRaycaster; intersects: Variant)
-    function clone: JLine
-    function copy(source: JLine): JLine
-  end;
-
-  JLineSegments = class external 'LineSegments'(JLine)
-    constructor Create(geometry: Variant {JGeometry or JBufferGeometry}; material: Variant {JLineDashedMaterial or JLineBasicMaterial or JShaderMaterial}; mode: Float);
-    function clone: JLineSegments
-    function copy(source: JLineSegments): JLineSegments
-  end;
-
-  JMesh = class external 'Mesh'(JObject3D)
-    constructor Create(geometry: JGeometry; material: JMaterial);
-    constructor Create(geometry: JBufferGeometry; material: JMaterial);
-    geometry: Variant {JGeometry or JBufferGeometry};
-    material: JMaterial;
-    procedure updateMorphTargets
-    function getMorphTargetIndexByName(name: String): Float
-    procedure raycast(raycaster: JRaycaster; intersects: Variant)
-    function clone: JMesh
-    function copy(source: JMesh): JMesh
-  end;
-
-  JPoints = class external 'Points'(JObject3D)
-    constructor Create(geometry: Variant {JGeometry or JBufferGeometry}; material: Variant {JPointsMaterial or JShaderMaterial});
-    geometry: JGeometry;
-    material: JMaterial;
-    procedure raycast(raycaster: JRaycaster; intersects: Variant)
-    function clone: JPoints
-    function copy(source: JPoints): JPoints
-  end;
-
-  JSkeleton = class external 'Skeleton'
-    constructor Create(bones: array of JBone; boneInverses: array of JMatrix4; useVertexTexture: Boolean);
-    useVertexTexture: Boolean;
-    identityMatrix: JMatrix4;
-    bones: array of JBone;
-    boneTextureWidth: Float;
-    boneTextureHeight: Float;
-    boneMatrices: JFloat32Array;
-    boneTexture: JDataTexture;
-    boneInverses: array of JMatrix4;
-    procedure calculateInverses(bone: JBone)
-    procedure pose
-    procedure update
-    function clone: JSkeleton
-  end;
-
-  JSkinnedMesh = class external 'SkinnedMesh'(JMesh)
-    constructor Create(geometry: Variant {JGeometry or JBufferGeometry}; material: JMeshBasicMaterial; useVertexTexture: Boolean);
-    constructor Create(geometry: Variant {JGeometry or JBufferGeometry}; material: JMeshDepthMaterial; useVertexTexture: Boolean);
-    constructor Create(geometry: Variant {JGeometry or JBufferGeometry}; material: JMeshFaceMaterial; useVertexTexture: Boolean);
-    constructor Create(geometry: Variant {JGeometry or JBufferGeometry}; material: JMeshLambertMaterial; useVertexTexture: Boolean);
-    constructor Create(geometry: Variant {JGeometry or JBufferGeometry}; material: JMeshNormalMaterial; useVertexTexture: Boolean);
-    constructor Create(geometry: Variant {JGeometry or JBufferGeometry}; material: JMeshPhongMaterial; useVertexTexture: Boolean);
-    constructor Create(geometry: Variant {JGeometry or JBufferGeometry}; material: JShaderMaterial; useVertexTexture: Boolean);
-    bindMode: String;
-    bindMatrix: JMatrix4;
-    bindMatrixInverse: JMatrix4;
-    procedure bind(skeleton: JSkeleton); overload;
-    procedure bind(skeleton: JSkeleton; bindMatrix: JMatrix4); overload;
-    procedure pose
-    procedure normalizeSkinWeights
-    procedure updateMatrixWorld; overload;
-    procedure updateMatrixWorld(force: Boolean); overload;
-    function clone: JSkinnedMesh
-    function copy: JSkinnedMesh; overload;
-    function copy(source: JSkinnedMesh): JSkinnedMesh; overload;
-    skeleton: JSkeleton;
-  end;
-
-  JSprite = class external 'Sprite'(JObject3D)
-    constructor Create(material: JMaterial);
-    geometry: JBufferGeometry;
-    material: JSpriteMaterial;
-    procedure raycast(raycaster: JRaycaster; intersects: Variant)
-    function clone: JSprite
-    function copy: JSprite; overload;
-    function copy(source: JSprite): JSprite; overload;
-  end;
-
-  JWebGLRenderer = class external 'WebGLRenderer'
-    constructor Create(parameters: JWebGLRendererParameters);
-    domElement: JHTMLCanvasElement;
-    context: JWebGLRenderingContext;
-    autoClear: Boolean;
-    autoClearColor: Boolean;
-    autoClearDepth: Boolean;
-    autoClearStencil: Boolean;
-    sortObjects: Boolean;
-    extensions: JWebGLExtensions;
-    gammaFactor: Float;
-    gammaInput: Boolean;
-    gammaOutput: Boolean;
-    shadowMapEnabled: Boolean;
-    shadowMapType: JShadowMapType;
-    shadowMapCullFace: JCullFace;
-    shadowMapDebug: Boolean;
-    maxMorphTargets: Float;
-    maxMorphNormals: Float;
-    autoScaleCubemaps: Boolean;
-    info: record
-      memory: record
-        programs: Float;
-        geometries: Float;
-        textures: Float;
-      end;;
-      render: record
-        calls: Float;
-        vertices: Float;
-        faces: Float;
-        points: Float;
-      end;;
-    end;;
-    shadowMap: JWebGLShadowMapInstance;
-    function getContext: JWebGLRenderingContext
-    procedure forceContextLoss
-    capabilities: JWebGLCapabilities;
-    function supportsVertexTextures: Boolean
-    function supportsFloatTextures: Boolean
-    function supportsStandardDerivatives: Boolean
-    function supportsCompressedTextureS3TC: Boolean
-    function supportsCompressedTexturePVRTC: Boolean
-    function supportsBlendMinMax: Boolean
-    function getPrecision: String
-    function getMaxAnisotropy: Float
-    function getPixelRatio: Float
-    procedure setPixelRatio(value: Float)
-    function getSize:       width: Float;
-      height: Float;
-    end;
-    procedure setSize(width: Float; height: Float); overload;
-    procedure setSize(width: Float; height: Float; updateStyle: Boolean); overload;
-    procedure setViewport; overload;
-    procedure setViewport(x: Float); overload;
-    procedure setViewport(x: Float; y: Float); overload;
-    procedure setViewport(x: Float; y: Float; width: Float); overload;
-    procedure setViewport(x: Float; y: Float; width: Float; height: Float); overload;
-    procedure setScissor(x: Float; y: Float; width: Float; height: Float)
-    procedure enableScissorTest(enable: Boolean)
-    procedure setClearColor(color: JColor); overload;
-    procedure setClearColor(color: JColor; alpha: Float); overload;
-    procedure setClearColor(color: String); overload;
-    procedure setClearColor(color: String; alpha: Float); overload;
-    procedure setClearColor(color: Float); overload;
-    procedure setClearColor(color: Float; alpha: Float); overload;
-    procedure setClearAlpha(alpha: Float)
-    procedure setClearColorHex(hex: Float; alpha: Float)
-    function getClearColor: JColor
-    function getClearAlpha: Float
-    procedure clear; overload;
-    procedure clear(color: Boolean); overload;
-    procedure clear(color: Boolean; depth: Boolean); overload;
-    procedure clear(color: Boolean; depth: Boolean; stencil: Boolean); overload;
-    procedure clearColor
-    procedure clearDepth
-    procedure clearStencil
-    procedure clearTarget(renderTarget: JWebGLRenderTarget; color: Boolean; depth: Boolean; stencil: Boolean)
-    procedure resetGLState
-    procedure dispose
-    procedure updateShadowMap(scene: JScene; camera: JCamera)
-    procedure renderBufferImmediate(&object: JObject3D; program: JObject; material: JMaterial)
-    procedure renderBufferDirect(camera: JCamera; lights: array of JLight; fog: JFog; material: JMaterial; geometryGroup: Variant; &object: JObject3D)
-    procedure renderBuffer(camera: JCamera; lights: array of JLight; fog: JFog; material: JMaterial; geometryGroup: Variant; &object: JObject3D)
-    procedure render(scene: JScene; camera: JCamera); overload;
-    procedure render(scene: JScene; camera: JCamera; renderTarget: JRenderTarget); overload;
-    procedure render(scene: JScene; camera: JCamera; renderTarget: JRenderTarget; forceClear: Boolean); overload;
-    procedure renderImmediateObject(camera: JCamera; lights: array of JLight; fog: JFog; material: JMaterial; &object: JObject3D)
-    procedure setFaceCulling; overload;
-    procedure setFaceCulling(cullFace: JCullFace); overload;
-    procedure setFaceCulling(cullFace: JCullFace; frontFace: JFrontFaceDirection); overload;
-    procedure setMaterialFaces(material: JMaterial)
-    procedure setDepthTest(depthTest: Boolean)
-    procedure setDepthWrite(depthWrite: Boolean)
-    procedure setBlending(blending: JBlending; blendEquation: JBlendingEquation; blendSrc: JBlendingSrcFactor; blendDst: JBlendingDstFactor)
-    procedure uploadTexture(texture: JTexture)
-    procedure setTexture(texture: JTexture; slot: Float)
-    procedure setRenderTarget(renderTarget: JRenderTarget)
-    procedure readRenderTargetPixels(renderTarget: JRenderTarget; x: Float; y: Float; width: Float; height: Float; buffer: Variant)
-  end;
-
-  JWebGLRenderTarget = class external 'WebGLRenderTarget'
-    constructor Create(width: Float; height: Float; options: JWebGLRenderTargetOptions);
-    uuid: String;
-    width: Float;
-    height: Float;
-    wrapS: JWrapping;
-    wrapT: JWrapping;
-    magFilter: JTextureFilter;
-    minFilter: JTextureFilter;
-    anisotropy: Float;
-    offset: JVector2;
-    repeat: JVector2;
-    format: Float;
-    &type: Float;
-    depthBuffer: Boolean;
-    stencilBuffer: Boolean;
-    generateMipmaps: Boolean;
-    shareDepthFrom: Variant;
-    procedure setSize(width: Float; height: Float)
-    function clone: JWebGLRenderTarget
-    function copy(source: JWebGLRenderTarget): JWebGLRenderTarget
-    procedure dispose
-    procedure addEventListener(&type: String; listener: procedure(event: Variant))
-    procedure hasEventListener(&type: String; listener: procedure(event: Variant))
-    procedure removeEventListener(&type: String; listener: procedure(event: Variant))
-    procedure dispatchEvent(event: record
-      &type: String;
-      target: Variant;
-    end;)
-  end;
-
-  JWebGLRenderTargetCube = class external 'WebGLRenderTargetCube'(JWebGLRenderTarget)
-    constructor Create(width: Float; height: Float; options: JWebGLRenderTargetOptions);
-    activeCubeFace: Float;
-  end;
-
-  JWebGLBufferRenderer = class external 'WebGLBufferRenderer'
-    constructor Create(_gl: Variant; extensions: Variant; _infoRender: Variant);
-    procedure setMode(value: Variant)
-    procedure render(start: Variant; count: Variant)
-    procedure renderInstances(geometry: Variant)
-  end;
-
-  JWebGLCapabilities = class external 'WebGLCapabilities'
-    constructor Create(gl: Variant; extensions: Variant; parameters: Variant);
-    getMaxPrecision: Variant;
-    precision: Variant;
-    maxTextures: Variant;
-    maxVertexTextures: Variant;
-    maxTextureSize: Variant;
-    maxCubemapSize: Variant;
-    maxAttributes: Variant;
-    maxVertexUniforms: Variant;
-    maxVaryings: Variant;
-    maxFragmentUniforms: Variant;
-    vertexTextures: Variant;
-    floatFragmentTextures: Variant;
-    floatVertexTextures: Variant;
-  end;
-
-  JWebGLExtensions = class external 'WebGLExtensions'
-    constructor Create(gl: Variant);
-    function get(name: String): Variant
-  end;
-
-  JWebGLProgram = class external 'WebGLProgram'
-    constructor Create(renderer: JWebGLRenderer; code: String; material: JShaderMaterial; parameters: JWebGLRendererParameters);
-    function getUniforms: Variant
-    function getAttributes: Variant
-    uniforms: Variant;
-    attributes: Variant;
-    id: Float;
-    code: String;
-    usedTimes: Float;
-    program: Variant;
-    vertexShader: JWebGLShader;
-    fragmentShader: JWebGLShader;
-  end;
-
-  JWebGLShader = class external 'WebGLShader'
-    constructor Create(gl: Variant; &type: String; &string: String);
-  end;
-
-  JLensFlarePlugin = class external 'LensFlarePlugin'
-    constructor Create;
-    procedure init(renderer: JRenderer)
-    procedure render(scene: JScene; camera: JCamera; viewportWidth: Float; viewportHeight: Float)
-  end;
-
-  JSpritePlugin = class external 'SpritePlugin'
-    constructor Create;
-    procedure init(renderer: JRenderer)
-    procedure render(scene: JScene; camera: JCamera; viewportWidth: Float; viewportHeight: Float)
-  end;
-
-  JFog = class external 'Fog'
-    constructor Create(hex: Float; near: Float; far: Float);
-    name: String;
-    color: JColor;
-    near: Float;
-    far: Float;
-    function clone: JFog
-  end;
-
-  JFogExp2 = class external 'FogExp2'
-    constructor Create(hex: Variant {Float or String}; density: Float);
-    name: String;
-    color: JColor;
-    density: Float;
-    function clone: JFogExp2
-  end;
-
-  JScene = class external 'Scene'(JObject3D)
-    constructor Create;
-    fog: JIFog;
-    overrideMaterial: JMaterial;
-    autoUpdate: Boolean;
-    function copy(source: JScene): JScene
-  end;
-
-  JCanvasTexture = class external 'CanvasTexture'(JTexture)
-    constructor Create(canvas: Variant {JHTMLImageElement or JHTMLCanvasElement or JHTMLVideoElement}; mapping: JMapping; wrapS: JWrapping; wrapT: JWrapping; magFilter: JTextureFilter; minFilter: JTextureFilter; format: JPixelFormat; &type: JTextureDataType; anisotropy: Float);
-    needsUpdate: Boolean;
-  end;
-
-  JCompressedTexture = class external 'CompressedTexture'(JTexture)
-    constructor Create(mipmaps: array of JImageData; width: Float; height: Float; format: JPixelFormat; &type: JTextureDataType; mapping: JMapping; wrapS: JWrapping; wrapT: JWrapping; magFilter: JTextureFilter; minFilter: JTextureFilter; anisotropy: Float);
-    image: record
-      width: Float;
-      height: Float;
-    end;;
-    mipmaps: array of JImageData;
-    flipY: Boolean;
-    generateMipmaps: Boolean;
-  end;
-
-  JCubeTexture = class external 'CubeTexture'(JTexture)
-    constructor Create(images: array of Variant; mapping: JMapping; wrapS: JWrapping; wrapT: JWrapping; magFilter: JTextureFilter; minFilter: JTextureFilter; format: JPixelFormat; &type: JTextureDataType; anisotropy: Float);
-    images: array of Variant;
-    function copy(source: JCubeTexture): JCubeTexture
-  end;
-
-  JDataTexture = class external 'DataTexture'(JTexture)
-    constructor Create(data: JImageData; width: Float; height: Float; format: JPixelFormat; &type: JTextureDataType; mapping: JMapping; wrapS: JWrapping; wrapT: JWrapping; magFilter: JTextureFilter; minFilter: JTextureFilter; anisotropy: Float);
-    image: record
-      data: JImageData;
-      width: Float;
-      height: Float;
-    end;;
-    magFilter: JTextureFilter;
-    minFilter: JTextureFilter;
-    flipY: Boolean;
-    generateMipmaps: Boolean;
-  end;
-
-  JTexture = class external 'Texture'
-    constructor Create(image: Variant {JHTMLImageElement or JHTMLCanvasElement or JHTMLVideoElement}; mapping: JMapping; wrapS: JWrapping; wrapT: JWrapping; magFilter: JTextureFilter; minFilter: JTextureFilter; format: JPixelFormat; &type: JTextureDataType; anisotropy: Float);
-    id: Float;
-    uuid: String;
-    name: String;
-    sourceFile: String;
-    image: Variant;
-    mipmaps: array of JImageData;
-    mapping: JMapping;
-    wrapS: JWrapping;
-    wrapT: JWrapping;
-    magFilter: JTextureFilter;
-    minFilter: JTextureFilter;
-    anisotropy: Float;
-    format: JPixelFormat;
-    &type: JTextureDataType;
-    offset: JVector2;
-    repeat: JVector2;
-    generateMipmaps: Boolean;
-    premultiplyAlpha: Boolean;
-    flipY: Boolean;
-    unpackAlignment: Float;
-    version: Float;
-    needsUpdate: Boolean;
-    onUpdate: ;
-    DEFAULT_IMAGE: Variant;
-    DEFAULT_MAPPING: Variant;
-    function clone: JTexture
-    function copy(source: JTexture): JTexture
-    function toJSON(meta: Variant): Variant
-    procedure dispose
-    procedure transformUv(uv: JVector)
-    procedure addEventListener(&type: String; listener: procedure(event: Variant))
-    procedure hasEventListener(&type: String; listener: procedure(event: Variant))
-    procedure removeEventListener(&type: String; listener: procedure(event: Variant))
-    procedure dispatchEvent(event: record
-      &type: String;
-      target: Variant;
-    end;)
-  end;
-
-  JVideoTexture = class external 'VideoTexture'(JTexture)
-    constructor Create(video: JHTMLVideoElement; mapping: JMapping; wrapS: JWrapping; wrapT: JWrapping; magFilter: JTextureFilter; minFilter: JTextureFilter; format: JPixelFormat; &type: JTextureDataType; anisotropy: Float);
-    generateMipmaps: Boolean;
-  end;
-
-  JAudio = class external 'Audio'(JObject3D)
-    constructor Create(listener: JAudioListener);
-    &type: String;
-    context: JAudioContext;
-    source: JAudioBufferSourceNode;
-    gain: JGainNode;
-    panner: JPannerNode;
-    autoplay: Boolean;
-    startTime: Float;
-    playbackRate: Float;
-    isPlaying: Boolean;
-    function load(file: String): JAudio
-    procedure play
-    procedure pause
-    procedure stop
-    procedure connect
-    procedure disconnect
-    procedure setFilter(value: Variant)
-    function getFilter: Variant
-    procedure setPlaybackRate(value: Float)
-    function getPlaybackRate: Float
-    procedure setLoop(value: Boolean)
-    function getLoop: Boolean
-    procedure setRefDistance(value: Float)
-    function getRefDistance: Float
-    procedure setRolloffFactor(value: Float)
-    function getRolloffFactor: Float
-    procedure setVolume(value: Float)
-    function getVolume: Float
-    procedure updateMatrixWorld; overload;
-    procedure updateMatrixWorld(force: Boolean); overload;
-  end;
-
-  JAudioListener = class external 'AudioListener'(JObject3D)
-    constructor Create;
-    &type: String;
-    context: JAudioContext;
-    procedure updateMatrixWorld; overload;
-    procedure updateMatrixWorld(force: Boolean); overload;
-  end;
-
-  JCurve = class external 'Curve'
-    function getPoint(t: Float): JT
-    function getPointAt(u: Float): JT
-    function getPoints: array of JT; overload;
-    function getPoints(divisions: Float): array of JT; overload;
-    function getSpacedPoints: array of JT; overload;
-    function getSpacedPoints(divisions: Float): array of JT; overload;
-    function getLength: Float
-    function getLengths: array of Float; overload;
-    function getLengths(divisions: Float): array of Float; overload;
-    procedure updateArcLengths
-    function getUtoTmapping(u: Float; distance: Float): Float
-    function getTangent(t: Float): JT
-    function getTangentAt(u: Float): JT
-    function create(constructorFunc: JFunction; getPointFunc: JFunction): JFunction
-  end;
-
-  JCurvePath = class external 'CurvePath'(JCurve {JT} )
-    constructor Create;
-    curves: array of JCurve{<JT>};
-    autoClose: Boolean;
-    procedure add(curve: JCurve{<JT>})
-    function checkConnection: Boolean
-    procedure closePath
-    function getPoint(t: Float): JT
-    function getLength: Float
-    function getCurveLengths: array of Float
-    function createPointsGeometry(divisions: Float): JGeometry
-    function createSpacedPointsGeometry(divisions: Float): JGeometry
-    function createGeometry(points: array of JT): JGeometry
-  end;
-
-  JPath = class external 'Path'(JCurvePath {JVector2} )
-    constructor Create(points: array of JVector2);
-    actions: array of JPathAction;
-    procedure fromPoints(vectors: array of JVector2)
-    procedure moveTo(x: Float; y: Float)
-    procedure lineTo(x: Float; y: Float)
-    procedure quadraticCurveTo(aCPx: Float; aCPy: Float; aX: Float; aY: Float)
-    procedure bezierCurveTo(aCP1x: Float; aCP1y: Float; aCP2x: Float; aCP2y: Float; aX: Float; aY: Float)
-    procedure splineThru(pts: array of JVector2)
-    procedure arc(aX: Float; aY: Float; aRadius: Float; aStartAngle: Float; aEndAngle: Float; aClockwise: Boolean)
-    procedure absarc(aX: Float; aY: Float; aRadius: Float; aStartAngle: Float; aEndAngle: Float; aClockwise: Boolean)
-    procedure ellipse(aX: Float; aY: Float; xRadius: Float; yRadius: Float; aStartAngle: Float; aEndAngle: Float; aClockwise: Boolean; aRotation: Float)
-    procedure absellipse(aX: Float; aY: Float; xRadius: Float; yRadius: Float; aStartAngle: Float; aEndAngle: Float; aClockwise: Boolean; aRotation: Float)
-    function getSpacedPoints: array of JVector2; overload;
-    function getSpacedPoints(divisions: Float): array of JVector2; overload;
-    function getSpacedPoints(divisions: Float; closedPath: Boolean): array of JVector2; overload;
-    function getPoints: array of JVector2; overload;
-    function getPoints(divisions: Float): array of JVector2; overload;
-    function getPoints(divisions: Float; closedPath: Boolean): array of JVector2; overload;
-    function toShapes: array of JShape
-  end;
-
-  JShape = class external 'Shape'(JPath)
-    constructor Create(points: array of JVector2);
-    holes: array of JPath;
-    function extrude: JExtrudeGeometry; overload;
-    function extrude(options: Variant): JExtrudeGeometry; overload;
-    function makeGeometry: JShapeGeometry; overload;
-    function makeGeometry(options: Variant): JShapeGeometry; overload;
-    function getPointsHoles(divisions: Float): array of array of JVector2
-    function extractAllPoints(divisions: Float):       shape: array of JVector2;
-      holes: array of array of JVector2;
-    end;
-    function extractPoints(divisions: Float): array of JVector2
-  end;
-
-  JArcCurve = class external 'ArcCurve'(JEllipseCurve)
-    constructor Create(aX: Float; aY: Float; aRadius: Float; aStartAngle: Float; aEndAngle: Float; aClockwise: Boolean);
-  end;
-
-  JCatmullRomCurve3 = class external 'CatmullRomCurve3'(JCurve {JVector3} )
-    constructor Create;
-  end;
-
-  JClosedSplineCurve3 = class external 'ClosedSplineCurve3'(JCurve {JVector3} )
-    constructor Create(points: array of JVector3);
-    points: array of JVector3;
-  end;
-
-  JCubicBezierCurve = class external 'CubicBezierCurve'(JCurve {JVector2} )
-    constructor Create(v0: JVector2; v1: JVector2; v2: JVector2; v3: JVector2);
-    v0: JVector2;
-    v1: JVector2;
-    v2: JVector2;
-    v3: JVector2;
-  end;
-
-  JCubicBezierCurve3 = class external 'CubicBezierCurve3'(JCurve {JVector3} )
-    constructor Create(v0: JVector3; v1: JVector3; v2: JVector3; v3: JVector3);
-    v0: JVector3;
-    v1: JVector3;
-    v2: JVector3;
-    v3: JVector3;
-  end;
-
-  JEllipseCurve = class external 'EllipseCurve'(JCurve {JVector2} )
-    constructor Create(aX: Float; aY: Float; xRadius: Float; yRadius: Float; aStartAngle: Float; aEndAngle: Float; aClockwise: Boolean; aRotation: Float);
-    aX: Float;
-    aY: Float;
-    xRadius: Float;
-    yRadius: Float;
-    aStartAngle: Float;
-    aEndAngle: Float;
-    aClockwise: Boolean;
-    aRotation: Float;
-  end;
-
-  JLineCurve = class external 'LineCurve'(JCurve {JVector2} )
-    constructor Create(v1: JVector2; v2: JVector2);
-    v1: JVector2;
-    v2: JVector2;
-  end;
-
-  JLineCurve3 = class external 'LineCurve3'(JCurve {JVector3} )
-    constructor Create(v1: JVector3; v2: JVector3);
-    v1: JVector3;
-    v2: JVector3;
-  end;
-
-  JQuadraticBezierCurve = class external 'QuadraticBezierCurve'(JCurve {JVector2} )
-    constructor Create(v0: JVector2; v1: JVector2; v2: JVector2);
-    v0: JVector2;
-    v1: JVector2;
-    v2: JVector2;
-  end;
-
-  JQuadraticBezierCurve3 = class external 'QuadraticBezierCurve3'(JCurve {JVector3} )
-    constructor Create(v0: JVector3; v1: JVector3; v2: JVector3);
-    v0: JVector3;
-    v1: JVector3;
-    v2: JVector3;
-  end;
-
-  JSplineCurve = class external 'SplineCurve'(JCurve {JVector2} )
-    constructor Create(points: array of JVector2);
-    points: array of JVector2;
-  end;
-
-  JSplineCurve3 = class external 'SplineCurve3'(JCurve {JVector3} )
-    constructor Create(points: array of JVector3);
-    points: array of JVector3;
-  end;
-
-  JBoxGeometry = class external 'BoxGeometry'(JGeometry)
-    constructor Create(width: Float; height: Float; depth: Float; widthSegments: Float; heightSegments: Float; depthSegments: Float);
-    parameters: record
-      width: Float;
-      height: Float;
-      depth: Float;
-      widthSegments: Float;
-      heightSegments: Float;
-      depthSegments: Float;
-    end;;
-    function clone: JBoxGeometry
-  end;
-
-  JCircleBufferGeometry = class external 'CircleBufferGeometry'(JGeometry)
-    constructor Create(radius: Float; segments: Float; thetaStart: Float; thetaLength: Float);
-    parameters: record
-      radius: Float;
-      segments: Float;
-      thetaStart: Float;
-      thetaLength: Float;
-    end;;
-    function clone: JCircleBufferGeometry
-  end;
-
-  JCircleGeometry = class external 'CircleGeometry'(JGeometry)
-    constructor Create(radius: Float; segments: Float; thetaStart: Float; thetaLength: Float);
-    parameters: record
-      radius: Float;
-      segments: Float;
-      thetaStart: Float;
-      thetaLength: Float;
-    end;;
-    function clone: JCircleGeometry
-  end;
-
-  JCubeGeometry = class external 'CubeGeometry'(JBoxGeometry)
-  end;
-
-  JCylinderGeometry = class external 'CylinderGeometry'(JGeometry)
-    constructor Create(radiusTop: Float; radiusBottom: Float; height: Float; radiusSegments: Float; heightSegments: Float; openEnded: Boolean; thetaStart: Float; thetaLength: Float);
-    parameters: record
-      radiusTop: Float;
-      radiusBottom: Float;
-      height: Float;
-      radialSegments: Float;
-      heightSegments: Float;
-      openEnded: Boolean;
-      thetaStart: Float;
-      thetaLength: Float;
-    end;;
-    function clone: JCylinderGeometry
-  end;
-
-  JDodecahedronGeometry = class external 'DodecahedronGeometry'(JGeometry)
-    constructor Create(radius: Float; detail: Float);
-    parameters: record
-      radius: Float;
-      detail: Float;
-    end;;
-    function clone: JDodecahedronGeometry
-  end;
-
-  JEdgesGeometry = class external 'EdgesGeometry'(JBufferGeometry)
-    constructor Create(geometry: JBufferGeometry; thresholdAngle: Float);
-    function clone: JEdgesGeometry
-  end;
-
-  JExtrudeGeometry = class external 'ExtrudeGeometry'(JGeometry)
-    constructor Create(shape: JShape; options: Variant);
-    constructor Create(shapes: array of JShape; options: Variant);
-    WorldUVGenerator: record
-      function generateTopUV(geometry: JGeometry; indexA: Float; indexB: Float; indexC: Float): array of JVector2
-      function generateSideWallUV(geometry: JGeometry; indexA: Float; indexB: Float; indexC: Float; indexD: Float): array of JVector2
-    end;;
-    procedure addShapeList(shapes: array of JShape); overload;
-    procedure addShapeList(shapes: array of JShape; options: Variant); overload;
-    procedure addShape(shape: JShape); overload;
-    procedure addShape(shape: JShape; options: Variant); overload;
-  end;
-
-  JIcosahedronGeometry = class external 'IcosahedronGeometry'(JPolyhedronGeometry)
-    constructor Create(radius: Float; detail: Float);
-    function clone: JIcosahedronGeometry
-  end;
-
-  JLatheGeometry = class external 'LatheGeometry'(JGeometry)
-    constructor Create(points: array of JVector3; segments: Float; phiStart: Float; phiLength: Float);
-    parameters: record
-      points: array of JVector3;
-      segments: Float;
-      phiStart: Float;
-      phiLength: Float;
-    end;;
-  end;
-
-  JOctahedronGeometry = class external 'OctahedronGeometry'(JPolyhedronGeometry)
-    constructor Create(radius: Float; detail: Float);
-    function clone: JOctahedronGeometry
-  end;
-
-  JParametricGeometry = class external 'ParametricGeometry'(JGeometry)
-    constructor Create(func: (u: Float; v: Float): JVector3; slices: Float; stacks: Float);
-    parameters: record
-      func: (u: Float; v: Float): JVector3;
-      slices: Float;
-      stacks: Float;
-    end;;
-  end;
-
-  JPlaneBufferGeometry = class external 'PlaneBufferGeometry'(JBufferGeometry)
-    constructor Create(width: Float; height: Float; widthSegments: Float; heightSegments: Float);
-    parameters: record
-      width: Float;
-      height: Float;
-      widthSegments: Float;
-      heightSegments: Float;
-    end;;
-    function clone: JPlaneBufferGeometry
-  end;
-
-  JPlaneGeometry = class external 'PlaneGeometry'(JGeometry)
-    constructor Create(width: Float; height: Float; widthSegments: Float; heightSegments: Float);
-    parameters: record
-      width: Float;
-      height: Float;
-      widthSegments: Float;
-      heightSegments: Float;
-    end;;
-    function clone: JPlaneGeometry
-  end;
-
-  JPolyhedronGeometry = class external 'PolyhedronGeometry'(JGeometry)
-    constructor Create(vertices: array of JVector3; faces: array of JFace3; radius: Float; detail: Float);
-    parameters: record
-      vertices: array of JVector3;
-      faces: array of JFace3;
-      radius: Float;
-      detail: Float;
-    end;;
-    function clone: JPolyhedronGeometry
-  end;
-
-  JRingGeometry = class external 'RingGeometry'(JGeometry)
-    constructor Create(innerRadius: Float; outerRadius: Float; thetaSegments: Float; phiSegments: Float; thetaStart: Float; thetaLength: Float);
-    parameters: record
-      innerRadius: Float;
-      outerRadius: Float;
-      thetaSegments: Float;
-      phiSegments: Float;
-      thetaStart: Float;
-      thetaLength: Float;
-    end;;
-    function clone: JRingGeometry
-  end;
-
-  JShapeGeometry = class external 'ShapeGeometry'(JGeometry)
-    constructor Create(shape: JShape; options: Variant);
-    constructor Create(shapes: array of JShape; options: Variant);
-    function addShapeList(shapes: array of JShape; options: Variant): JShapeGeometry
-    procedure addShape(shape: JShape); overload;
-    procedure addShape(shape: JShape; options: Variant); overload;
-  end;
-
-  JSphereBufferGeometry = class external 'SphereBufferGeometry'(JBufferGeometry)
-    constructor Create(radius: Float; widthSegments: Float; heightSegments: Float; phiStart: Float; phiLength: Float; thetaStart: Float; thetaLength: Float);
-    parameters: record
-      radius: Float;
-      widthSegments: Float;
-      heightSegments: Float;
-      phiStart: Float;
-      phiLength: Float;
-      thetaStart: Float;
-      thetaLength: Float;
-    end;;
-    function clone: JSphereBufferGeometry
-  end;
-
-  JSphereGeometry = class external 'SphereGeometry'(JGeometry)
-    constructor Create(radius: Float; widthSegments: Float; heightSegments: Float; phiStart: Float; phiLength: Float; thetaStart: Float; thetaLength: Float);
-    parameters: record
-      radius: Float;
-      widthSegments: Float;
-      heightSegments: Float;
-      phiStart: Float;
-      phiLength: Float;
-      thetaStart: Float;
-      thetaLength: Float;
-    end;;
-  end;
-
-  JTetrahedronGeometry = class external 'TetrahedronGeometry'(JPolyhedronGeometry)
-    constructor Create(radius: Float; detail: Float);
-    function clone: JTetrahedronGeometry
-  end;
-
-  JTorusGeometry = class external 'TorusGeometry'(JGeometry)
-    constructor Create(radius: Float; tube: Float; radialSegments: Float; tubularSegments: Float; arc: Float);
-    parameters: record
-      radius: Float;
-      tube: Float;
-      radialSegments: Float;
-      tubularSegments: Float;
-      arc: Float;
-    end;;
-    function clone: JTorusGeometry
-  end;
-
-  JTorusKnotGeometry = class external 'TorusKnotGeometry'(JGeometry)
-    constructor Create(radius: Float; tube: Float; radialSegments: Float; tubularSegments: Float; p: Float; q: Float; heightScale: Float);
-    parameters: record
-      radius: Float;
-      tube: Float;
-      radialSegments: Float;
-      tubularSegments: Float;
-      p: Float;
-      q: Float;
-      heightScale: Float;
-    end;;
-    function clone: JTorusKnotGeometry
-  end;
-
-  JTubeGeometry = class external 'TubeGeometry'(JGeometry)
-    constructor Create(path: JPath; segments: Float; radius: Float; radiusSegments: Float; closed: Boolean; taper: (u: Float): Float);
-    parameters: record
-      path: JPath;
-      segments: Float;
-      radius: Float;
-      radialSegments: Float;
-      closed: Boolean;
-      taper: (u: Float): Float;
-    end;;
-    tangents: array of JVector3;
-    normals: array of JVector3;
-    binormals: array of JVector3;
-    function NoTaper: Float; overload;
-    function NoTaper(u: Float): Float; overload;
-    function SinusoidalTaper(u: Float): Float
-    procedure FrenetFrames(path: JPath; segments: Float; closed: Boolean)
-    function clone: JTubeGeometry
-  end;
-
-  JWireframeGeometry = class external 'WireframeGeometry'(JBufferGeometry)
-    constructor Create(geometry: Variant {JGeometry or JBufferGeometry});
-  end;
-
-  JArrowHelper = class external 'ArrowHelper'(JObject3D)
-    constructor Create(dir: JVector3; origin: JVector3; _length: Float; hex: Float; headLength: Float; headWidth: Float);
-    line: JLine;
-    cone: JMesh;
-    procedure setDirection(dir: JVector3)
-    procedure setLength(_length: Float); overload;
-    procedure setLength(_length: Float; headLength: Float); overload;
-    procedure setLength(_length: Float; headLength: Float; headWidth: Float); overload;
-    procedure setColor(hex: Float)
-  end;
-
-  JAxisHelper = class external 'AxisHelper'(JLineSegments)
-    constructor Create(size: Float);
-  end;
-
-  JBoundingBoxHelper = class external 'BoundingBoxHelper'(JMesh)
-    constructor Create(&object: JObject3D; hex: Float);
-    &object: JObject3D;
-    box: JBox3;
-    procedure update
-  end;
-
-  JBoxHelper = class external 'BoxHelper'(JLineSegments)
-    constructor Create(&object: JObject3D);
-    procedure update; overload;
-    procedure update(&object: JObject3D); overload;
-  end;
-
-  JCameraHelper = class external 'CameraHelper'(JLineSegments)
-    constructor Create(camera: JCamera);
-    camera: JCamera;
-    pointMap: record
-      // property Item[id: String]: array of Float;
-    end;;
-    procedure update
-  end;
-
-  JDirectionalLightHelper = class external 'DirectionalLightHelper'(JObject3D)
-    constructor Create(light: JLight; size: Float);
-    light: JLight;
-    lightPlane: JLine;
-    targetLine: JLine;
-    procedure dispose
-    procedure update
-  end;
-
-  JEdgesHelper = class external 'EdgesHelper'(JLineSegments)
-    constructor Create(&object: JObject3D; hex: Float; thresholdAngle: Float);
-  end;
-
-  JFaceNormalsHelper = class external 'FaceNormalsHelper'(JLineSegments)
-    constructor Create(&object: JObject3D; size: Float; hex: Float; linewidth: Float);
-    &object: JObject3D;
-    size: Float;
-    procedure update; overload;
-    procedure update(&object: JObject3D); overload;
-  end;
-
-  JGridHelper = class external 'GridHelper'(JLineSegments)
-    constructor Create(size: Float; step: Float);
-    color1: JColor;
-    color2: JColor;
-    procedure setColors(colorCenterLine: Float; colorGrid: Float)
-  end;
-
-  JHemisphereLightHelper = class external 'HemisphereLightHelper'(JObject3D)
-    constructor Create(light: JLight; sphereSize: Float);
-    light: JLight;
-    colors: array of JColor;
-    lightSphere: JMesh;
-    procedure dispose
-    procedure update
-  end;
-
-  JPointLightHelper = class external 'PointLightHelper'(JObject3D)
-    constructor Create(light: JLight; sphereSize: Float);
-    light: JLight;
-    procedure dispose
-    procedure update
-  end;
-
-  JSkeletonHelper = class external 'SkeletonHelper'(JLineSegments)
-    constructor Create(bone: JObject3D);
-    bones: array of JBone;
-    root: JObject3D;
-    function getBoneList(&object: JObject3D): array of JBone
-    procedure update
-  end;
-
-  JSpotLightHelper = class external 'SpotLightHelper'(JObject3D)
-    constructor Create(light: JLight; sphereSize: Float; arrowLength: Float);
-    light: JLight;
-    cone: JMesh;
-    procedure dispose
-    procedure update
-  end;
-
-  JVertexNormalsHelper = class external 'VertexNormalsHelper'(JLineSegments)
-    constructor Create(&object: JObject3D; size: Float; hex: Float; linewidth: Float);
-    &object: JObject3D;
-    size: Float;
-    procedure update; overload;
-    procedure update(&object: JObject3D); overload;
-  end;
-
-  JWireframeHelper = class external 'WireframeHelper'(JLineSegments)
-    constructor Create(&object: JObject3D; hex: Float);
-  end;
-
-  JImmediateRenderObject = class external 'ImmediateRenderObject'(JObject3D)
-    constructor Create(material: JMaterial);
-    material: JMaterial;
-    procedure render(renderCallback: JFunction)
-  end;
-
-  JMorphBlendMesh = class external 'MorphBlendMesh'(JMesh)
-    constructor Create(geometry: JGeometry; material: JMaterial);
-    animationsMap: record
-      // property Item[name: String]: JMorphBlendMeshAnimation;
-    end;;
-    animationsList: array of JMorphBlendMeshAnimation;
-    procedure createAnimation(name: String; start: Float; &end: Float; fps: Float)
-    procedure autoCreateAnimations(fps: Float)
-    procedure setAnimationDirectionForward(name: String)
-    procedure setAnimationDirectionBackward(name: String)
-    procedure setAnimationFPS(name: String; fps: Float)
-    procedure setAnimationDuration(name: String; duration: Float)
-    procedure setAnimationWeight(name: String; weight: Float)
-    procedure setAnimationTime(name: String; time: Float)
-    function getAnimationTime(name: String): Float
-    function getAnimationDuration(name: String): Float
-    procedure playAnimation(name: String)
-    procedure stopAnimation(name: String)
-    procedure update(delta: Float)
+    end);
   end;
 
   JMaterialParameters = class external
@@ -3194,34 +1939,391 @@ type
     fog: Boolean; // nullable
   end;
 
-  JMath = class external
-    function generateUUID: String
-    function clamp(value: Float; min: Float; max: Float): Float
-    function euclideanModulo(n: Float; m: Float): Float
-    function mapLinear(x: Float; a1: Float; a2: Float; b1: Float; b2: Float): Float
-    function smoothstep(x: Float; min: Float; max: Float): Float
-    function smootherstep(x: Float; min: Float; max: Float): Float
-    function random16: Float
-    function randInt(low: Float; high: Float): Float
-    function randFloat(low: Float; high: Float): Float
-    function randFloatSpread(range: Float): Float
-    function degToRad(degrees: Float): Float
-    function radToDeg(radians: Float): Float
-    function isPowerOfTwo(value: Float): Boolean
-    function nearestPowerOfTwo(value: Float): Float
-    function nextPowerOfTwo(value: Float): Float
+  JLineBasicMaterial = class external 'three.LineBasicMaterial'(JMaterial)
+    constructor Create(parameters: JLineBasicMaterialParameters);
+    color: JColor;
+    linewidth: Float;
+    linecap: String;
+    linejoin: String;
+    vertexColors: JColors;
+    fog: Boolean;
+    function clone: JLineBasicMaterial;
+    function copy(source: JLineBasicMaterial): JLineBasicMaterial;
   end;
 
-  JMatrix = class external
-    elements: JFloat32Array;
-    function identity: JMatrix
-    function copy(m: JMatrix): JMatrix
-    function multiplyScalar(s: Float): JMatrix
-    function determinant: Float
-    function getInverse(matrix: JMatrix): JMatrix; overload;
-    function getInverse(matrix: JMatrix; throwOnInvertible: Boolean): JMatrix; overload;
-    function transpose: JMatrix
-    function clone: JMatrix
+  JLineDashedMaterial = class external 'three.LineDashedMaterial'(JMaterial)
+    constructor Create(parameters: JLineDashedMaterialParameters);
+    color: JColor;
+    linewidth: Float;
+    scale: Float;
+    dashSize: Float;
+    gapSize: Float;
+    vertexColors: JColors;
+    fog: Boolean;
+    function clone: JLineDashedMaterial;
+    function copy(source: JLineDashedMaterial): JLineDashedMaterial;
+  end;
+
+  JMeshBasicMaterial = class external 'three.MeshBasicMaterial'(JMaterial)
+    constructor Create(parameters: JMeshBasicMaterialParameters);
+    color: JColor;
+    map: JTexture;
+    aoMap: JTexture;
+    aoMapIntensity: Float;
+    specularMap: JTexture;
+    alphaMap: JTexture;
+    envMap: JTexture;
+    combine: JCombine;
+    reflectivity: Float;
+    refractionRatio: Float;
+    fog: Boolean;
+    shading: JShading;
+    wireframe: Boolean;
+    wireframeLinewidth: Float;
+    wireframeLinecap: String;
+    wireframeLinejoin: String;
+    vertexColors: JColors;
+    skinning: Boolean;
+    morphTargets: Boolean;
+    function clone: JMeshBasicMaterial;
+    function copy(source: JMeshBasicMaterial): JMeshBasicMaterial;
+  end;
+
+  JMeshDepthMaterial = class external 'three.MeshDepthMaterial'(JMaterial)
+    constructor Create(parameters: JMeshDepthMaterialParameters);
+    wireframe: Boolean;
+    wireframeLinewidth: Float;
+    function clone: JMeshDepthMaterial;
+    function copy(source: JMeshDepthMaterial): JMeshDepthMaterial;
+  end;
+
+  JMeshLambertMaterial = class external 'three.MeshLambertMaterial'(JMaterial)
+    constructor Create(parameters: JMeshLambertMaterialParameters);
+    color: JColor;
+    emissive: JColor;
+    map: JTexture;
+    specularMap: JTexture;
+    alphaMap: JTexture;
+    envMap: JTexture;
+    combine: JCombine;
+    reflectivity: Float;
+    refractionRatio: Float;
+    fog: Boolean;
+    wireframe: Boolean;
+    wireframeLinewidth: Float;
+    wireframeLinecap: String;
+    wireframeLinejoin: String;
+    vertexColors: JColors;
+    skinning: Boolean;
+    morphTargets: Boolean;
+    morphNormals: Boolean;
+    function clone: JMeshLambertMaterial;
+    function copy(source: JMeshLambertMaterial): JMeshLambertMaterial;
+  end;
+
+  JMeshNormalMaterial = class external 'three.MeshNormalMaterial'(JMaterial)
+    constructor Create(parameters: JMeshNormalMaterialParameters);
+    wireframe: Boolean;
+    wireframeLinewidth: Float;
+    morphTargets: Boolean;
+    function clone: JMeshNormalMaterial;
+    function copy(source: JMeshNormalMaterial): JMeshNormalMaterial;
+  end;
+
+  JMeshPhongMaterial = class external 'three.MeshPhongMaterial'(JMaterial)
+    constructor Create(parameters: JMeshPhongMaterialParameters);
+    color: JColor;
+    emissive: JColor;
+    specular: JColor;
+    shininess: Float;
+    metal: Boolean;
+    map: JTexture;
+    lightMap: JTexture;
+    lightMapIntensity: Float;
+    aoMap: JTexture;
+    aoMapIntensity: Float;
+    emissiveMap: JTexture;
+    bumpMap: JTexture;
+    bumpScale: Float;
+    normalMap: JTexture;
+    normalScale: JVector2;
+    displacementMap: JTexture;
+    displacementScale: Float;
+    displacementBias: Float;
+    specularMap: JTexture;
+    alphaMap: JTexture;
+    envMap: JTexture;
+    combine: JCombine;
+    reflectivity: Float;
+    refractionRatio: Float;
+    fog: Boolean;
+    shading: JShading;
+    wireframe: Boolean;
+    wireframeLinewidth: Float;
+    wireframeLinecap: String;
+    wireframeLinejoin: String;
+    vertexColors: JColors;
+    skinning: Boolean;
+    morphTargets: Boolean;
+    morphNormals: Boolean;
+    function clone: JMeshPhongMaterial;
+    function copy(source: JMeshPhongMaterial): JMeshPhongMaterial;
+  end;
+
+  JMultiMaterial = class external 'three.MultiMaterial'(JMaterial)
+    constructor Create(materials: array of JMaterial);
+    materials: array of JMaterial;
+    function toJSON: Variant;
+    function clone: JMultiMaterial;
+  end;
+
+  JMeshFaceMaterial = class external 'three.MeshFaceMaterial'(JMultiMaterial)
+  end;
+
+  JPointsMaterial = class external 'three.PointsMaterial'(JMaterial)
+    constructor Create(parameters: JPointsMaterialParameters);
+    color: JColor;
+    map: JTexture;
+    size: Float;
+    sizeAttenuation: Boolean;
+    vertexColors: Boolean;
+    fog: Boolean;
+    function clone: JPointsMaterial;
+    function copy(source: JPointsMaterial): JPointsMaterial;
+  end;
+
+  JShaderMaterial = class external 'three.ShaderMaterial'(JMaterial)
+    constructor Create(parameters: JShaderMaterialParameters);
+    defines: Variant;
+    uniforms: Variant;
+    vertexShader: String;
+    fragmentShader: String;
+    shading: JShading;
+    linewidth: Float;
+    wireframe: Boolean;
+    wireframeLinewidth: Float;
+    fog: Boolean;
+    lights: Boolean;
+    vertexColors: JColors;
+    skinning: Boolean;
+    morphTargets: Boolean;
+    morphNormals: Boolean;
+    derivatives: Boolean;
+    defaultAttributeValues: Variant;
+    index0AttributeName: String;
+    function clone: JShaderMaterial;
+    function copy(source: JShaderMaterial): JShaderMaterial;
+    function toJSON(meta: Variant): Variant;
+  end;
+
+  JRawShaderMaterial = class external 'three.RawShaderMaterial'(JShaderMaterial)
+    constructor Create(parameters: JShaderMaterialParameters);
+  end;
+
+  JSpriteMaterial = class external 'three.SpriteMaterial'(JMaterial)
+    constructor Create(parameters: JSpriteMaterialParameters);
+    color: JColor;
+    map: JTexture;
+    rotation: Float;
+    fog: Boolean;
+    function clone: JSpriteMaterial;
+    function copy(source: JSpriteMaterial): JSpriteMaterial;
+  end;
+
+  JBox2 = class external 'three.Box2'
+    constructor Create(min: JVector2; max: JVector2);
+    max: JVector2;
+    min: JVector2;
+    function set(min: JVector2; max: JVector2): JBox2;
+    function setFromPoints(points: array of JVector2): JBox2;
+    function setFromCenterAndSize(center: JVector2; size: JVector2): JBox2;
+    function clone: JBox2;
+    function copy(box: JBox2): JBox2;
+    function makeEmpty: JBox2;
+    function empty: Boolean;
+    function center: JVector2; overload;
+    function center(optionalTarget: JVector2): JVector2; overload;
+    function size: JVector2; overload;
+    function size(optionalTarget: JVector2): JVector2; overload;
+    function expandByPoint(point: JVector2): JBox2;
+    function expandByVector(vector: JVector2): JBox2;
+    function expandByScalar(scalar: Float): JBox2;
+    function containsPoint(point: JVector2): Boolean;
+    function containsBox(box: JBox2): Boolean;
+    function getParameter(point: JVector2): JVector2;
+    function isIntersectionBox(box: JBox2): Boolean;
+    function clampPoint(point: JVector2): JVector2; overload;
+    function clampPoint(point: JVector2; optionalTarget: JVector2): JVector2; overload;
+    function distanceToPoint(point: JVector2): Float;
+    function intersect(box: JBox2): JBox2;
+    function union(box: JBox2): JBox2;
+    function translate(offset: JVector2): JBox2;
+    function equals(box: JBox2): Boolean;
+  end;
+
+  JBox3 = class external 'three.Box3'
+    constructor Create(min: JVector3; max: JVector3);
+    max: JVector3;
+    min: JVector3;
+    function set(min: JVector3; max: JVector3): JBox3;
+    function setFromPoints(points: array of JVector3): JBox3;
+    function setFromCenterAndSize(center: JVector3; size: JVector3): JBox3;
+    function setFromObject(&object: JObject3D): JBox3;
+    function clone: JBox3;
+    function copy(box: JBox3): JBox3;
+    function makeEmpty: JBox3;
+    function empty: Boolean;
+    function center: JVector3; overload;
+    function center(optionalTarget: JVector3): JVector3; overload;
+    function size: JVector3; overload;
+    function size(optionalTarget: JVector3): JVector3; overload;
+    function expandByPoint(point: JVector3): JBox3;
+    function expandByVector(vector: JVector3): JBox3;
+    function expandByScalar(scalar: Float): JBox3;
+    function containsPoint(point: JVector3): Boolean;
+    function containsBox(box: JBox3): Boolean;
+    function getParameter(point: JVector3): JVector3;
+    function isIntersectionBox(box: JBox3): Boolean;
+    function clampPoint(point: JVector3): JVector3; overload;
+    function clampPoint(point: JVector3; optionalTarget: JVector3): JVector3; overload;
+    function distanceToPoint(point: JVector3): Float;
+    function getBoundingSphere: JSphere; overload;
+    function getBoundingSphere(optionalTarget: JSphere): JSphere; overload;
+    function intersect(box: JBox3): JBox3;
+    function union(box: JBox3): JBox3;
+    function applyMatrix4(matrix: JMatrix4): JBox3;
+    function translate(offset: JVector3): JBox3;
+    function equals(box: JBox3): Boolean;
+  end;
+
+  JFrustum = class external 'three.Frustum'
+    constructor Create(p0: JPlane; p1: JPlane; p2: JPlane; p3: JPlane; p4: JPlane; p5: JPlane);
+    planes: array of JPlane;
+    function set: JFrustum; overload;
+    function set(p0: Float): JFrustum; overload;
+    function set(p0, p1: Float): JFrustum; overload;
+    function set(p0, p1, p2: Float): JFrustum; overload;
+    function set(p0, p1, p2, p3: Float): JFrustum; overload;
+    function set(p0, p1, p2, p3, p4: Float): JFrustum; overload;
+    function set(p0, p1, p2, p3, p4, p5: Float): JFrustum; overload;
+    function clone: JFrustum;
+    function copy(frustum: JFrustum): JFrustum;
+    function setFromMatrix(m: JMatrix4): JFrustum;
+    function intersectsObject(&object: JObject3D): Boolean;
+    function intersectsSphere(sphere: JSphere): Boolean;
+    function intersectsBox(box: JBox3): Boolean;
+    function containsPoint(point: JVector3): Boolean;
+  end;
+
+  JLine3 = class external 'three.Line3'
+    constructor Create(start: JVector3; &end: JVector3);
+    start: JVector3;
+    &end: JVector3;
+    function set: JLine3; overload;
+    function set(start: JVector3): JLine3; overload;
+    function set(start: JVector3; &end: JVector3): JLine3; overload;
+    function clone: JLine3;
+    function copy(line: JLine3): JLine3;
+    function center: JVector3; overload;
+    function center(optionalTarget: JVector3): JVector3; overload;
+    function delta: JVector3; overload;
+    function delta(optionalTarget: JVector3): JVector3; overload;
+    function distanceSq: Float;
+    function distance: Float;
+    function at(t: Float): JVector3; overload;
+    function at(t: Float; optionalTarget: JVector3): JVector3; overload;
+    function closestPointToPointParameter(point: JVector3): Float; overload;
+    function closestPointToPointParameter(point: JVector3; clampToLine: Boolean): Float; overload;
+    function closestPointToPoint(point: JVector3): JVector3; overload;
+    function closestPointToPoint(point: JVector3; clampToLine: Boolean): JVector3; overload;
+    function closestPointToPoint(point: JVector3; clampToLine: Boolean; optionalTarget: JVector3): JVector3; overload;
+    function applyMatrix4(matrix: JMatrix4): JLine3;
+    function equals(line: JLine3): Boolean;
+  end;
+
+  JPlane = class external 'three.Plane'
+    constructor Create(normal: JVector3; constant: Float);
+    normal: JVector3;
+    constant: Float;
+    function set(normal: JVector3; constant: Float): JPlane;
+    function setComponents(x: Float; y: Float; z: Float; w: Float): JPlane;
+    function setFromNormalAndCoplanarPoint(normal: JVector3; point: JVector3): JPlane;
+    function setFromCoplanarPoints(a: JVector3; b: JVector3; c: JVector3): JPlane;
+    function clone: JPlane;
+    function copy(plane: JPlane): JPlane;
+    function normalize: JPlane;
+    function negate: JPlane;
+    function distanceToPoint(point: JVector3): Float;
+    function distanceToSphere(sphere: JSphere): Float;
+    function projectPoint(point: JVector3): JVector3; overload;
+    function projectPoint(point: JVector3; optionalTarget: JVector3): JVector3; overload;
+    function orthoPoint(point: JVector3): JVector3; overload;
+    function orthoPoint(point: JVector3; optionalTarget: JVector3): JVector3; overload;
+    function isIntersectionLine(line: JLine3): Boolean;
+    function intersectLine(line: JLine3): JVector3; overload;
+    function intersectLine(line: JLine3; optionalTarget: JVector3): JVector3; overload;
+    function coplanarPoint: JVector3; overload;
+    function coplanarPoint(optionalTarget: Boolean): JVector3; overload;
+    function applyMatrix4(matrix: JMatrix4): JPlane; overload;
+    function applyMatrix4(matrix: JMatrix4; optionalNormalMatrix: JMatrix3): JPlane; overload;
+    function translate(offset: JVector3): JPlane;
+    function equals(plane: JPlane): Boolean;
+  end;
+
+  JQuaternion = class external 'three.Quaternion'
+    constructor Create(x: Float; y: Float; z: Float; w: Float);
+    x: Float;
+    y: Float;
+    z: Float;
+    w: Float;
+    function set(x: Float; y: Float; z: Float; w: Float): JQuaternion;
+    function clone: JQuaternion;
+    function copy(q: JQuaternion): JQuaternion;
+    function setFromEuler(euler: JEuler): JQuaternion; overload;
+    function setFromEuler(euler: JEuler; update: Boolean): JQuaternion; overload;
+    function setFromAxisAngle(axis: JVector3; angle: Float): JQuaternion;
+    function setFromRotationMatrix(m: JMatrix4): JQuaternion;
+    function setFromUnitVectors(vFrom: JVector3; vTo: JVector3): JQuaternion;
+    function inverse: JQuaternion;
+    function conjugate: JQuaternion;
+    function dot(v: JVector3): Float;
+    function lengthSq: Float;
+    function length: Float;
+    function normalize: JQuaternion;
+    function multiply(q: JQuaternion): JQuaternion;
+    function multiplyQuaternions(a: JQuaternion; b: JQuaternion): JQuaternion;
+    function multiplyVector3(vector: JVector3): JVector3;
+    function slerp(qb: JQuaternion; t: Float): JQuaternion; overload;
+    function slerp(qa: JQuaternion; qb: JQuaternion; qm: JQuaternion; t: Float): JQuaternion; overload;
+    function equals(v: JQuaternion): Boolean;
+    function fromArray(xyzw: array of Float): JQuaternion; overload;
+    function fromArray(xyzw: array of Float; offset: Float): JQuaternion; overload;
+    function toArray: array of Float; overload;
+    function toArray(xyzw: array of Float): array of Float; overload;
+    function toArray(xyzw: array of Float; offset: Float): array of Float; overload;
+    onChange: procedure;
+  end;
+
+  JSphere = class external 'three.Sphere'
+    constructor Create(center: JVector3; radius: Float);
+    center: JVector3;
+    radius: Float;
+    function set(center: JVector3; radius: Float): JSphere;
+    function setFromPoints(points: array of JVector3): JSphere; overload;
+    function setFromPoints(points: array of JVector3; optionalCenter: JVector3): JSphere; overload;
+    function clone: JSphere;
+    function copy(sphere: JSphere): JSphere;
+    function empty: Boolean;
+    function containsPoint(point: JVector3): Boolean;
+    function distanceToPoint(point: JVector3): Float;
+    function intersectsSphere(sphere: JSphere): Boolean;
+    function clampPoint(point: JVector3): JVector3; overload;
+    function clampPoint(point: JVector3; optionalTarget: JVector3): JVector3; overload;
+    function getBoundingBox: JBox3; overload;
+    function getBoundingBox(optionalTarget: JBox3): JBox3; overload;
+    function applyMatrix4(matrix: JMatrix4): JSphere;
+    function translate(offset: JVector3): JSphere;
+    function equals(sphere: JSphere): Boolean;
   end;
 
   JSplineControlPoint = class external
@@ -3230,27 +2332,122 @@ type
     z: Float;
   end;
 
-  JVector = class external
-    procedure setComponent(index: Integer; value: Float)
-    function getComponent(index: Integer): Float
-    function copy(v: JVector): JVector
-    function add(v: JVector): JVector
-    function addVectors(a: JVector; b: JVector): JVector
-    function sub(v: JVector): JVector
-    function subVectors(a: JVector; b: JVector): JVector
-    function multiplyScalar(s: Float): JVector
-    function divideScalar(s: Float): JVector
-    function negate: JVector
-    function dot(v: JVector): Float
-    function lengthSq: Float
-    function length: Float
-    function normalize: JVector
-    function distanceTo(v: JVector): Float
-    function distanceToSquared(v: JVector): Float
-    function setLength(l: Float): JVector
-    function lerp(v: JVector; alpha: Float): JVector
-    function equals(v: JVector): Boolean
-    function clone: JVector
+  JSpline = class external 'three.Spline'
+    constructor Create(points: array of JSplineControlPoint);
+    points: array of JSplineControlPoint;
+    procedure initFromArray(a: array of array of Float);
+    function getPoint(k: Float): JSplineControlPoint;
+    function getControlPointsArray: array of array of Float;
+    function getLength: record
+      chunks: array of Float;
+      total: Float;
+    end; overload;
+    function getLength(nSubDivisions: Float): record
+      chunks: array of Float;
+      total: Float;
+    end; overload;
+    procedure reparametrizeByArcLength(samplingCoef: Float);
+  end;
+
+  JTriangle = class external 'three.Triangle'
+    constructor Create(a: JVector3; b: JVector3; c: JVector3);
+    a: JVector3;
+    b: JVector3;
+    c: JVector3;
+    function set(a: JVector3; b: JVector3; c: JVector3): JTriangle;
+    function setFromPointsAndIndices(points: array of JVector3; i0: Float; i1: Float; i2: Float): JTriangle;
+    function clone: JTriangle;
+    function copy(triangle: JTriangle): JTriangle;
+    function area: Float;
+    function midpoint: JVector3; overload;
+    function midpoint(optionalTarget: JVector3): JVector3; overload;
+    function normal: JVector3; overload;
+    function normal(optionalTarget: JVector3): JVector3; overload;
+    function plane: JPlane; overload;
+    function plane(optionalTarget: JVector3): JPlane; overload;
+    function barycoordFromPoint(point: JVector3): JVector3; overload;
+    function barycoordFromPoint(point: JVector3; optionalTarget: JVector3): JVector3; overload;
+    function containsPoint(point: JVector3): Boolean; overload;
+    function equals(triangle: JTriangle): Boolean;
+    function normal(a: JVector3; b: JVector3; c: JVector3): JVector3; overload;
+    function normal(a: JVector3; b: JVector3; c: JVector3; optionalTarget: JVector3): JVector3; overload;
+    function barycoordFromPoint(point: JVector3; a: JVector3; b: JVector3; c: JVector3; optionalTarget: JVector3): JVector3; overload;
+    function containsPoint(point: JVector3; a: JVector3; b: JVector3; c: JVector3): Boolean; overload;
+  end;
+
+  JMesh = class external 'three.Mesh'(JObject3D)
+    constructor Create(geometry: JGeometry; material: JMaterial); overload;
+    constructor Create(geometry: JBufferGeometry; material: JMaterial);  overload;
+    geometry: Variant {JGeometry or JBufferGeometry};
+    material: JMaterial;
+    procedure updateMorphTargets;
+    function getMorphTargetIndexByName(name: String): Float;
+    procedure raycast(raycaster: JRaycaster; intersects: Variant);
+    function clone: JMesh;
+    function copy(source: JMesh): JMesh;
+  end;
+
+  JSkeleton = class external 'three.Skeleton'
+    constructor Create(bones: array of JBone; boneInverses: array of JMatrix4; useVertexTexture: Boolean);
+    useVertexTexture: Boolean;
+    identityMatrix: JMatrix4;
+    bones: array of JBone;
+    boneTextureWidth: Float;
+    boneTextureHeight: Float;
+    boneMatrices: JFloat32Array;
+    boneTexture: JDataTexture;
+    boneInverses: array of JMatrix4;
+    procedure calculateInverses(bone: JBone);
+    procedure pose;
+    procedure update;
+    function clone: JSkeleton;
+  end;
+
+  JSkinnedMesh = class external 'three.SkinnedMesh'(JMesh)
+    constructor Create(geometry: Variant {JGeometry or JBufferGeometry}; material: JMeshBasicMaterial; useVertexTexture: Boolean); overload;
+    constructor Create(geometry: Variant {JGeometry or JBufferGeometry}; material: JMeshDepthMaterial; useVertexTexture: Boolean); overload;
+    constructor Create(geometry: Variant {JGeometry or JBufferGeometry}; material: JMeshFaceMaterial; useVertexTexture: Boolean); overload;
+    constructor Create(geometry: Variant {JGeometry or JBufferGeometry}; material: JMeshLambertMaterial; useVertexTexture: Boolean); overload;
+    constructor Create(geometry: Variant {JGeometry or JBufferGeometry}; material: JMeshNormalMaterial; useVertexTexture: Boolean); overload;
+    constructor Create(geometry: Variant {JGeometry or JBufferGeometry}; material: JMeshPhongMaterial; useVertexTexture: Boolean); overload;
+    constructor Create(geometry: Variant {JGeometry or JBufferGeometry}; material: JShaderMaterial; useVertexTexture: Boolean); overload;
+    bindMode: String;
+    bindMatrix: JMatrix4;
+    bindMatrixInverse: JMatrix4;
+    procedure bind(skeleton: JSkeleton); overload;
+    procedure bind(skeleton: JSkeleton; bindMatrix: JMatrix4); overload;
+    procedure pose;
+    procedure normalizeSkinWeights;
+    procedure updateMatrixWorld; overload;
+    procedure updateMatrixWorld(force: Boolean); overload;
+    function clone: JSkinnedMesh;
+    function copy: JSkinnedMesh; overload;
+    function copy(source: JSkinnedMesh): JSkinnedMesh; overload;
+    skeleton: JSkeleton;
+  end;
+
+  JBone = class external 'three.Bone'(JObject3D)
+    constructor Create(skin: JSkinnedMesh);
+    skin: JSkinnedMesh;
+    function clone: JBone;
+    function copy(source: JBone): JBone;
+  end;
+
+  JGroup = class external 'three.Group'(JObject3D)
+    constructor Create;
+  end;
+
+  JLOD = class external 'three.LOD'(JObject3D)
+    constructor Create;
+    levels: array of Variant;
+    procedure addLevel(&object: JObject3D); overload;
+    procedure addLevel(&object: JObject3D; distance: Float); overload;
+    function getObjectForDistance(distance: Float): JObject3D;
+    procedure raycast(raycaster: JRaycaster; intersects: Variant);
+    procedure update(camera: JCamera);
+    function clone: JLOD;
+    function copy(source: JLOD): JLOD;
+    function toJSON(meta: Variant): Variant;
   end;
 
   JLensFlareProperty = class external
@@ -3267,11 +2464,54 @@ type
     blending: JBlending;
   end;
 
-  JRenderer = class external
-    procedure render(scene: JScene; camera: JCamera)
-    procedure setSize(width: Float; height: Float); overload;
-    procedure setSize(width: Float; height: Float; updateStyle: Boolean); overload;
-    domElement: JHTMLCanvasElement;
+  JLensFlare = class external 'three.LensFlare'(JObject3D)
+    constructor Create(texture: JTexture; size: Float; distance: Float; blending: JBlending; color: JColor);
+    lensFlares: array of JLensFlareProperty;
+    positionScreen: JVector3;
+    customUpdateCallback: procedure(&object: JLensFlare);
+    procedure add(texture: JTexture); overload;
+    procedure add(texture: JTexture; size: Float); overload;
+    procedure add(texture: JTexture; size: Float; distance: Float); overload;
+    procedure add(texture: JTexture; size: Float; distance: Float; blending: JBlending); overload;
+    procedure add(texture: JTexture; size: Float; distance: Float; blending: JBlending; color: JColor); overload;
+    procedure add(obj: JObject3D); overload;
+    procedure updateLensFlares;
+    function clone: JLensFlare;
+    function copy(source: JLensFlare): JLensFlare;
+  end;
+
+  JLine = class external 'three.Line'(JObject3D)
+    constructor Create(geometry: Variant {JGeometry or JBufferGeometry}; material: Variant {JLineDashedMaterial or JLineBasicMaterial or JShaderMaterial}; mode: Float);
+    geometry: Variant {JGeometry or JBufferGeometry};
+    material: JMaterial;
+    procedure raycast(raycaster: JRaycaster; intersects: Variant);
+    function clone: JLine;
+    function copy(source: JLine): JLine;
+  end;
+
+  JLineSegments = class external 'three.LineSegments'(JLine)
+    constructor Create(geometry: Variant {JGeometry or JBufferGeometry}; material: Variant {JLineDashedMaterial or JLineBasicMaterial or JShaderMaterial}; mode: Float);
+    function clone: JLineSegments;
+    function copy(source: JLineSegments): JLineSegments;
+  end;
+
+  JPoints = class external 'three.Points'(JObject3D)
+    constructor Create(geometry: Variant {JGeometry or JBufferGeometry}; material: Variant {JPointsMaterial or JShaderMaterial});
+    geometry: JGeometry;
+    material: JMaterial;
+    procedure raycast(raycaster: JRaycaster; intersects: Variant);
+    function clone: JPoints;
+    function copy(source: JPoints): JPoints;
+  end;
+
+  JSprite = class external 'three.Sprite'(JObject3D)
+    constructor Create(material: JMaterial);
+    geometry: JBufferGeometry;
+    material: JSpriteMaterial;
+    procedure raycast(raycaster: JRaycaster; intersects: Variant);
+    function clone: JSprite;
+    function copy: JSprite; overload;
+    function copy(source: JSprite): JSprite; overload;
   end;
 
   JWebGLRendererParameters = class external
@@ -3301,6 +2541,882 @@ type
     &type: JTextureDataType; // nullable
     depthBuffer: Boolean; // nullable
     stencilBuffer: Boolean; // nullable
+  end;
+
+  JWebGLExtensions = class external 'three.WebGLExtensions'
+    constructor Create(gl: Variant);
+    function get(name: String): Variant;
+  end;
+
+  JWebGLShadowMapInstance = class external
+    constructor Create;
+    enabled: Boolean;
+    autoUpdate: Boolean;
+    needsUpdate: Boolean;
+    &type: JShadowMapType;
+    cullFace: JCullFace;
+    procedure render(scene: JScene);
+  end;
+
+  JWebGLCapabilities = class external 'three.WebGLCapabilities'
+    constructor Create(gl: Variant; extensions: Variant; parameters: Variant);
+    getMaxPrecision: Variant;
+    precision: Variant;
+    maxTextures: Variant;
+    maxVertexTextures: Variant;
+    maxTextureSize: Variant;
+    maxCubemapSize: Variant;
+    maxAttributes: Variant;
+    maxVertexUniforms: Variant;
+    maxVaryings: Variant;
+    maxFragmentUniforms: Variant;
+    vertexTextures: Variant;
+    floatFragmentTextures: Variant;
+    floatVertexTextures: Variant;
+  end;
+
+  JWebGLRenderTarget = class external 'three.WebGLRenderTarget'
+    constructor Create(width: Float; height: Float; options: JWebGLRenderTargetOptions);
+    uuid: String;
+    width: Float;
+    height: Float;
+    wrapS: JWrapping;
+    wrapT: JWrapping;
+    magFilter: JTextureFilter;
+    minFilter: JTextureFilter;
+    anisotropy: Float;
+    offset: JVector2;
+    &repeat: JVector2;
+    format: Float;
+    &type: Float;
+    depthBuffer: Boolean;
+    stencilBuffer: Boolean;
+    generateMipmaps: Boolean;
+    shareDepthFrom: Variant;
+    procedure setSize(width: Float; height: Float);
+    function clone: JWebGLRenderTarget;
+    function copy(source: JWebGLRenderTarget): JWebGLRenderTarget;
+    procedure dispose;
+    procedure addEventListener(&type: String; listener: procedure(event: Variant));
+    procedure hasEventListener(&type: String; listener: procedure(event: Variant));
+    procedure removeEventListener(&type: String; listener: procedure(event: Variant));
+    procedure dispatchEvent(event: record
+      &type: String;
+      target: Variant;
+    end);
+  end;
+
+  JIFog = class external
+    name: String;
+    color: JColor;
+    function clone: JIFog;
+  end;
+
+  JFog = class external 'three.Fog' (JIFog)
+    constructor Create(hex: Float; near: Float; far: Float);
+    near: Float;
+    far: Float;
+    function clone: JFog;
+  end;
+
+  JFogExp2 = class external 'three.FogExp2' (JIFog)
+    constructor Create(hex: Variant {Float or String}; density: Float);
+    density: Float;
+    function clone: JFogExp2;
+  end;
+
+  JWebGLRenderer = class external 'three.WebGLRenderer'
+    constructor Create(parameters: JWebGLRendererParameters);
+    domElement: JHTMLCanvasElement;
+    context: JWebGLRenderingContext;
+    autoClear: Boolean;
+    autoClearColor: Boolean;
+    autoClearDepth: Boolean;
+    autoClearStencil: Boolean;
+    sortObjects: Boolean;
+    extensions: JWebGLExtensions;
+    gammaFactor: Float;
+    gammaInput: Boolean;
+    gammaOutput: Boolean;
+    shadowMapEnabled: Boolean;
+    shadowMapType: JShadowMapType;
+    shadowMapCullFace: JCullFace;
+    shadowMapDebug: Boolean;
+    maxMorphTargets: Float;
+    maxMorphNormals: Float;
+    autoScaleCubemaps: Boolean;
+    info: record
+      memory: record
+        programs: Float;
+        geometries: Float;
+        textures: Float;
+      end;
+      render: record
+        calls: Float;
+        vertices: Float;
+        faces: Float;
+        points: Float;
+      end;
+    end;
+    shadowMap: JWebGLShadowMapInstance;
+    function getContext: JWebGLRenderingContext;
+    procedure forceContextLoss;
+    capabilities: JWebGLCapabilities;
+    function supportsVertexTextures: Boolean;
+    function supportsFloatTextures: Boolean;
+    function supportsStandardDerivatives: Boolean;
+    function supportsCompressedTextureS3TC: Boolean;
+    function supportsCompressedTexturePVRTC: Boolean;
+    function supportsBlendMinMax: Boolean;
+    function getPrecision: String;
+    function getMaxAnisotropy: Float;
+    function getPixelRatio: Float;
+    procedure setPixelRatio(value: Float);
+    function getSize: record
+      width: Float;
+      height: Float;
+    end;
+    procedure setSize(width: Float; height: Float); overload;
+    procedure setSize(width: Float; height: Float; updateStyle: Boolean); overload;
+    procedure setViewport; overload;
+    procedure setViewport(x: Float); overload;
+    procedure setViewport(x: Float; y: Float); overload;
+    procedure setViewport(x: Float; y: Float; width: Float); overload;
+    procedure setViewport(x: Float; y: Float; width: Float; height: Float); overload;
+    procedure setScissor(x: Float; y: Float; width: Float; height: Float);
+    procedure enableScissorTest(enable: Boolean);
+    procedure setClearColor(color: JColor); overload;
+    procedure setClearColor(color: JColor; alpha: Float); overload;
+    procedure setClearColor(color: String); overload;
+    procedure setClearColor(color: String; alpha: Float); overload;
+    procedure setClearColor(color: Float); overload;
+    procedure setClearColor(color: Float; alpha: Float); overload;
+    procedure setClearAlpha(alpha: Float);
+    procedure setClearColorHex(hex: Float; alpha: Float);
+    function getClearColor: JColor;
+    function getClearAlpha: Float;
+    procedure clear; overload;
+    procedure clear(color: Boolean); overload;
+    procedure clear(color: Boolean; depth: Boolean); overload;
+    procedure clear(color: Boolean; depth: Boolean; stencil: Boolean); overload;
+    procedure clearColor;
+    procedure clearDepth;
+    procedure clearStencil;
+    procedure clearTarget(renderTarget: JWebGLRenderTarget; color: Boolean; depth: Boolean; stencil: Boolean);
+    procedure resetGLState;
+    procedure dispose;
+    procedure updateShadowMap(scene: JScene; camera: JCamera);
+    procedure renderBufferImmediate(&object: JObject3D; program: JObject; material: JMaterial);
+    procedure renderBufferDirect(camera: JCamera; lights: array of JLight; fog: JFog; material: JMaterial; geometryGroup: Variant; &object: JObject3D);
+    procedure renderBuffer(camera: JCamera; lights: array of JLight; fog: JFog; material: JMaterial; geometryGroup: Variant; &object: JObject3D);
+    procedure render(scene: JScene; camera: JCamera); overload;
+    procedure render(scene: JScene; camera: JCamera; renderTarget: JRenderTarget); overload;
+    procedure render(scene: JScene; camera: JCamera; renderTarget: JRenderTarget; forceClear: Boolean); overload;
+    procedure renderImmediateObject(camera: JCamera; lights: array of JLight; fog: JFog; material: JMaterial; &object: JObject3D);
+    procedure setFaceCulling; overload;
+    procedure setFaceCulling(cullFace: JCullFace); overload;
+    procedure setFaceCulling(cullFace: JCullFace; frontFace: JFrontFaceDirection); overload;
+    procedure setMaterialFaces(material: JMaterial);
+    procedure setDepthTest(depthTest: Boolean);
+    procedure setDepthWrite(depthWrite: Boolean);
+    procedure setBlending(blending: JBlending; blendEquation: JBlendingEquation; blendSrc: JBlendingSrcFactor; blendDst: JBlendingDstFactor);
+    procedure uploadTexture(texture: JTexture);
+    procedure setTexture(texture: JTexture; slot: Float);
+    procedure setRenderTarget(renderTarget: JRenderTarget);
+    procedure readRenderTargetPixels(renderTarget: JRenderTarget; x: Float; y: Float; width: Float; height: Float; buffer: Variant);
+  end;
+
+  JWebGLRenderTargetCube = class external 'three.WebGLRenderTargetCube'(JWebGLRenderTarget)
+    constructor Create(width: Float; height: Float; options: JWebGLRenderTargetOptions);
+    activeCubeFace: Float;
+  end;
+
+  JWebGLBufferRenderer = class external 'three.WebGLBufferRenderer'
+    constructor Create(_gl: Variant; extensions: Variant; _infoRender: Variant);
+    procedure setMode(value: Variant);
+    procedure render(start: Variant; count: Variant);
+    procedure renderInstances(geometry: Variant);
+  end;
+
+  JWebGLProgram = class external 'three.WebGLProgram'
+    constructor Create(renderer: JWebGLRenderer; code: String; material: JShaderMaterial; parameters: JWebGLRendererParameters);
+    function getUniforms: Variant;
+    function getAttributes: Variant;
+    uniforms: Variant;
+    attributes: Variant;
+    id: Float;
+    code: String;
+    usedTimes: Float;
+    program: Variant;
+    vertexShader: JWebGLShader;
+    fragmentShader: JWebGLShader;
+  end;
+
+  JWebGLShader = class external 'three.WebGLShader'
+    constructor Create(gl: Variant; &type: String; &string: String);
+  end;
+
+  JLensFlarePlugin = class external 'three.LensFlarePlugin'
+    constructor Create;
+    procedure init(renderer: JRenderer);
+    procedure render(scene: JScene; camera: JCamera; viewportWidth: Float; viewportHeight: Float);
+  end;
+
+  JSpritePlugin = class external 'three.SpritePlugin'
+    constructor Create;
+    procedure init(renderer: JRenderer);
+    procedure render(scene: JScene; camera: JCamera; viewportWidth: Float; viewportHeight: Float);
+  end;
+
+  JScene = class external 'three.Scene'(JObject3D)
+    constructor Create;
+    fog: JIFog;
+    overrideMaterial: JMaterial;
+    autoUpdate: Boolean;
+    function copy(source: JScene): JScene;
+  end;
+
+  JAudioListener = class external 'three.AudioListener'(JObject3D)
+    constructor Create;
+    &type: String;
+    context: JAudioContext;
+    procedure updateMatrixWorld; overload;
+    procedure updateMatrixWorld(force: Boolean); overload;
+  end;
+
+  JAudio = class external 'three.Audio'(JObject3D)
+    constructor Create(listener: JAudioListener);
+    &type: String;
+    context: JAudioContext;
+    source: JAudioBufferSourceNode;
+    gain: JGainNode;
+    panner: JPannerNode;
+    autoplay: Boolean;
+    startTime: Float;
+    playbackRate: Float;
+    isPlaying: Boolean;
+    function load(file: String): JAudio;
+    procedure play;
+    procedure pause;
+    procedure stop;
+    procedure connect;
+    procedure disconnect;
+    procedure setFilter(value: Variant);
+    function getFilter: Variant;
+    procedure setPlaybackRate(value: Float);
+    function getPlaybackRate: Float;
+    procedure setLoop(value: Boolean);
+    function getLoop: Boolean;
+    procedure setRefDistance(value: Float);
+    function getRefDistance: Float;
+    procedure setRolloffFactor(value: Float);
+    function getRolloffFactor: Float;
+    procedure setVolume(value: Float);
+    function getVolume: Float;
+    procedure updateMatrixWorld; overload;
+    procedure updateMatrixWorld(force: Boolean); overload;
+  end;
+
+  JCurve2 = class external 'three.Curve'
+    function getPoint(t: Float): JVector2;
+    function getPointAt(u: Float): JVector2;
+    function getPoints: array of JVector2; overload;
+    function getPoints(divisions: Float): array of JVector2; overload;
+    function getSpacedPoints: array of JVector2; overload;
+    function getSpacedPoints(divisions: Float): array of JVector2; overload;
+    function getLength: Float;
+    function getLengths: array of Float; overload;
+    function getLengths(divisions: Float): array of Float; overload;
+    procedure updateArcLengths;
+    function getUtoTmapping(u: Float; distance: Float): Float;
+    function getTangent(t: Float): JVector2;
+    function getTangentAt(u: Float): JVector2;
+    function create(constructorFunc: procedure; getPointFunc: procedure): procedure;
+  end;
+
+  JCurve3 = class external 'three.Curve'
+    function getPoint(t: Float): JVector3;
+    function getPointAt(u: Float): JVector3;
+    function getPoints: array of JVector3; overload;
+    function getPoints(divisions: Float): array of JVector3; overload;
+    function getSpacedPoints: array of JVector3; overload;
+    function getSpacedPoints(divisions: Float): array of JVector3; overload;
+    function getLength: Float;
+    function getLengths: array of Float; overload;
+    function getLengths(divisions: Float): array of Float; overload;
+    procedure updateArcLengths;
+    function getUtoTmapping(u: Float; distance: Float): Float;
+    function getTangent(t: Float): JVector3;
+    function getTangentAt(u: Float): JVector3;
+    function create(constructorFunc: procedure; getPointFunc: procedure): procedure;
+  end;
+
+  JCurvePath2 = class external 'three.CurvePath'(JCurve2)
+    constructor Create;
+    curves: array of JCurve2;
+    autoClose: Boolean;
+    procedure add(curve: JCurve2);
+    function checkConnection: Boolean;
+    procedure closePath;
+    function getPoint(t: Float): JVector2;
+    function getLength: Float;
+    function getCurveLengths: array of Float;
+    function createPointsGeometry(divisions: Float): JGeometry;
+    function createSpacedPointsGeometry(divisions: Float): JGeometry;
+    function createGeometry(points: array of JVector2): JGeometry;
+  end;
+
+  JCurvePath3 = class external 'three.CurvePath'(JCurve3)
+    constructor Create;
+    curves: array of JCurve3;
+    autoClose: Boolean;
+    procedure add(curve: JCurve3);
+    function checkConnection: Boolean;
+    procedure closePath;
+    function getPoint(t: Float): JVector3;
+    function getLength: Float;
+    function getCurveLengths: array of Float;
+    function createPointsGeometry(divisions: Float): JGeometry;
+    function createSpacedPointsGeometry(divisions: Float): JGeometry;
+    function createGeometry(points: array of JVector2): JGeometry;
+  end;
+
+  JPathAction = class external
+    action: JPathActions;
+    args: Variant;
+  end;
+
+  JPath = class external 'three.Path'(JCurvePath2)
+    constructor Create(points: array of JVector2);
+    actions: array of JPathAction;
+    procedure fromPoints(vectors: array of JVector2);
+    procedure moveTo(x, y: Float);
+    procedure lineTo(x, y: Float);
+    procedure quadraticCurveTo(aCPx: Float; aCPy: Float; aX: Float; aY: Float);
+    procedure bezierCurveTo(aCP1x: Float; aCP1y: Float; aCP2x: Float; aCP2y: Float; aX: Float; aY: Float);
+    procedure splineThru(pts: array of JVector2);
+    procedure arc(aX: Float; aY: Float; aRadius: Float; aStartAngle: Float; aEndAngle: Float; aClockwise: Boolean);
+    procedure absarc(aX: Float; aY: Float; aRadius: Float; aStartAngle: Float; aEndAngle: Float; aClockwise: Boolean);
+    procedure ellipse(aX: Float; aY: Float; xRadius: Float; yRadius: Float; aStartAngle: Float; aEndAngle: Float; aClockwise: Boolean; aRotation: Float);
+    procedure absellipse(aX: Float; aY: Float; xRadius: Float; yRadius: Float; aStartAngle: Float; aEndAngle: Float; aClockwise: Boolean; aRotation: Float);
+    function getSpacedPoints: array of JVector2; overload;
+    function getSpacedPoints(divisions: Float): array of JVector2; overload;
+    function getSpacedPoints(divisions: Float; closedPath: Boolean): array of JVector2; overload;
+    function getPoints: array of JVector2; overload;
+    function getPoints(divisions: Float): array of JVector2; overload;
+    function getPoints(divisions: Float; closedPath: Boolean): array of JVector2; overload;
+    function toShapes: array of JShape;
+  end;
+
+  JShape = class external 'three.Shape'(JPath)
+    constructor Create(points: array of JVector2);
+    holes: array of JPath;
+    function extrude: JExtrudeGeometry; overload;
+    function extrude(options: Variant): JExtrudeGeometry; overload;
+    function makeGeometry: JShapeGeometry; overload;
+    function makeGeometry(options: Variant): JShapeGeometry; overload;
+    function getPointsHoles(divisions: Float): array of array of JVector2;
+    function extractAllPoints(divisions: Float): record
+      shape: array of JVector2;
+      holes: array of array of JVector2;
+    end;
+    function extractPoints(divisions: Float): array of JVector2;
+  end;
+
+  JEllipseCurve = class external 'three.EllipseCurve'(JCurve2)
+    constructor Create(aX: Float; aY: Float; xRadius: Float; yRadius: Float; aStartAngle: Float; aEndAngle: Float; aClockwise: Boolean; aRotation: Float);
+    aX: Float;
+    aY: Float;
+    xRadius: Float;
+    yRadius: Float;
+    aStartAngle: Float;
+    aEndAngle: Float;
+    aClockwise: Boolean;
+    aRotation: Float;
+  end;
+
+  JArcCurve = class external 'three.ArcCurve'(JEllipseCurve)
+    constructor Create(aX: Float; aY: Float; aRadius: Float; aStartAngle: Float; aEndAngle: Float; aClockwise: Boolean);
+  end;
+
+  JCatmullRomCurve3 = class external 'three.CatmullRomCurve3'(JCurve3)
+    constructor Create;
+  end;
+
+  JClosedSplineCurve3 = class external 'three.ClosedSplineCurve3'(JCurve3)
+    constructor Create(points: array of JVector3);
+    points: array of JVector3;
+  end;
+
+  JCubicBezierCurve = class external 'three.CubicBezierCurve'(JCurve2)
+    constructor Create(v0: JVector2; v1: JVector2; v2: JVector2; v3: JVector2);
+    v0: JVector2;
+    v1: JVector2;
+    v2: JVector2;
+    v3: JVector2;
+  end;
+
+  JCubicBezierCurve3 = class external 'three.CubicBezierCurve3'(JCurve3)
+    constructor Create(v0: JVector3; v1: JVector3; v2: JVector3; v3: JVector3);
+    v0: JVector3;
+    v1: JVector3;
+    v2: JVector3;
+    v3: JVector3;
+  end;
+
+  JLineCurve = class external 'three.LineCurve'(JCurve2)
+    constructor Create(v1: JVector2; v2: JVector2);
+    v1: JVector2;
+    v2: JVector2;
+  end;
+
+  JLineCurve3 = class external 'three.LineCurve3'(JCurve3)
+    constructor Create(v1: JVector3; v2: JVector3);
+    v1: JVector3;
+    v2: JVector3;
+  end;
+
+  JQuadraticBezierCurve = class external 'three.QuadraticBezierCurve'(JCurve2)
+    constructor Create(v0: JVector2; v1: JVector2; v2: JVector2);
+    v0: JVector2;
+    v1: JVector2;
+    v2: JVector2;
+  end;
+
+  JQuadraticBezierCurve3 = class external 'three.QuadraticBezierCurve3'(JCurve3)
+    constructor Create(v0: JVector3; v1: JVector3; v2: JVector3);
+    v0: JVector3;
+    v1: JVector3;
+    v2: JVector3;
+  end;
+
+  JSplineCurve = class external 'three.SplineCurve'(JCurve2)
+    constructor Create(points: array of JVector2);
+    points: array of JVector2;
+  end;
+
+  JSplineCurve3 = class external 'three.SplineCurve3'(JCurve3)
+    constructor Create(points: array of JVector3);
+    points: array of JVector3;
+  end;
+
+  JBoxGeometry = class external 'three.BoxGeometry'(JGeometry)
+    constructor Create(width: Float; height: Float; depth: Float; widthSegments: Float; heightSegments: Float; depthSegments: Float);
+    parameters: record
+      width: Float;
+      height: Float;
+      depth: Float;
+      widthSegments: Float;
+      heightSegments: Float;
+      depthSegments: Float;
+    end;
+    function clone: JBoxGeometry;
+  end;
+
+  JCircleBufferGeometry = class external 'three.CircleBufferGeometry'(JGeometry)
+    constructor Create(radius: Float; segments: Float; thetaStart: Float; thetaLength: Float);
+    parameters: record
+      radius: Float;
+      segments: Float;
+      thetaStart: Float;
+      thetaLength: Float;
+    end;
+    function clone: JCircleBufferGeometry;
+  end;
+
+  JCircleGeometry = class external 'three.CircleGeometry'(JGeometry)
+    constructor Create(radius: Float; segments: Float; thetaStart: Float; thetaLength: Float);
+    parameters: record
+      radius: Float;
+      segments: Float;
+      thetaStart: Float;
+      thetaLength: Float;
+    end;
+    function clone: JCircleGeometry;
+  end;
+
+  JCubeGeometry = class external 'three.CubeGeometry'(JBoxGeometry)
+  end;
+
+  JCylinderGeometry = class external 'three.CylinderGeometry'(JGeometry)
+    constructor Create(radiusTop: Float; radiusBottom: Float; height: Float; radiusSegments: Float; heightSegments: Float; openEnded: Boolean; thetaStart: Float; thetaLength: Float);
+    parameters: record
+      radiusTop: Float;
+      radiusBottom: Float;
+      height: Float;
+      radialSegments: Float;
+      heightSegments: Float;
+      openEnded: Boolean;
+      thetaStart: Float;
+      thetaLength: Float;
+    end;
+    function clone: JCylinderGeometry;
+  end;
+
+  JDodecahedronGeometry = class external 'three.DodecahedronGeometry'(JGeometry)
+    constructor Create(radius: Float; detail: Float);
+    parameters: record
+      radius: Float;
+      detail: Float;
+    end;
+    function clone: JDodecahedronGeometry;
+  end;
+
+  JEdgesGeometry = class external 'three.EdgesGeometry'(JBufferGeometry)
+    constructor Create(geometry: JBufferGeometry; thresholdAngle: Float);
+    function clone: JEdgesGeometry;
+  end;
+
+  JPolyhedronGeometry = class external 'three.PolyhedronGeometry'(JGeometry)
+    constructor Create(vertices: array of JVector3; faces: array of JFace3; radius: Float; detail: Float);
+    parameters: record
+      vertices: array of JVector3;
+      faces: array of JFace3;
+      radius: Float;
+      detail: Float;
+    end;
+    function clone: JPolyhedronGeometry;
+  end;
+
+  JIcosahedronGeometry = class external 'three.IcosahedronGeometry'(JPolyhedronGeometry)
+    constructor Create(radius: Float; detail: Float);
+    function clone: JIcosahedronGeometry;
+  end;
+
+  JRingGeometry = class external 'three.RingGeometry'(JGeometry)
+    constructor Create(innerRadius: Float; outerRadius: Float; thetaSegments: Float; phiSegments: Float; thetaStart: Float; thetaLength: Float);
+    parameters: record
+      innerRadius: Float;
+      outerRadius: Float;
+      thetaSegments: Float;
+      phiSegments: Float;
+      thetaStart: Float;
+      thetaLength: Float;
+    end;
+    function clone: JRingGeometry;
+  end;
+
+  JLatheGeometry = class external 'three.LatheGeometry'(JGeometry)
+    constructor Create(points: array of JVector3; segments: Float; phiStart: Float; phiLength: Float);
+    parameters: record
+      points: array of JVector3;
+      segments: Float;
+      phiStart: Float;
+      phiLength: Float;
+    end;
+  end;
+
+  JOctahedronGeometry = class external 'three.OctahedronGeometry'(JPolyhedronGeometry)
+    constructor Create(radius: Float; detail: Float);
+    function clone: JOctahedronGeometry;
+  end;
+
+  JParametricGeometry = class external 'three.ParametricGeometry'(JGeometry)
+    constructor Create(func: function(u: Float; v: Float): JVector3; slices: Float; stacks: Float);
+    parameters: record
+      func: function(u: Float; v: Float): JVector3;
+      slices: Float;
+      stacks: Float;
+    end;
+  end;
+
+  JPlaneBufferGeometry = class external 'three.PlaneBufferGeometry'(JBufferGeometry)
+    constructor Create(width: Float; height: Float; widthSegments: Float; heightSegments: Float);
+    parameters: record
+      width: Float;
+      height: Float;
+      widthSegments: Float;
+      heightSegments: Float;
+    end;
+    function clone: JPlaneBufferGeometry;
+  end;
+
+  JPlaneGeometry = class external 'three.PlaneGeometry'(JGeometry)
+    constructor Create(width: Float; height: Float; widthSegments: Float; heightSegments: Float);
+    parameters: record
+      width: Float;
+      height: Float;
+      widthSegments: Float;
+      heightSegments: Float;
+    end;
+    function clone: JPlaneGeometry;
+  end;
+
+  JShapeGeometry = class external 'three.ShapeGeometry'(JGeometry)
+    constructor Create(shape: JShape; options: Variant); overload;
+    constructor Create(shapes: array of JShape; options: Variant); overload;
+    function addShapeList(shapes: array of JShape; options: Variant): JShapeGeometry;
+    procedure addShape(shape: JShape); overload;
+    procedure addShape(shape: JShape; options: Variant); overload;
+  end;
+
+  JWorldUVGenerator = class external
+    function generateTopUV(geometry: JGeometry; indexA: Float; indexB: Float; indexC: Float): array of JVector2;
+    function generateSideWallUV(geometry: JGeometry; indexA: Float; indexB: Float; indexC: Float; indexD: Float): array of JVector2;
+  end;
+
+  JExtrudeGeometry = class external 'three.ExtrudeGeometry'(JGeometry)
+    constructor Create(shape: JShape; options: Variant); overload;
+    constructor Create(shapes: array of JShape; options: Variant); overload;
+    WorldUVGenerator: JWorldUVGenerator;
+    procedure addShapeList(shapes: array of JShape); overload;
+    procedure addShapeList(shapes: array of JShape; options: Variant); overload;
+    procedure addShape(shape: JShape); overload;
+    procedure addShape(shape: JShape; options: Variant); overload;
+  end;
+
+  JSphereBufferGeometry = class external 'three.SphereBufferGeometry'(JBufferGeometry)
+    constructor Create(radius: Float; widthSegments: Float; heightSegments: Float; phiStart: Float; phiLength: Float; thetaStart: Float; thetaLength: Float);
+    parameters: record
+      radius: Float;
+      widthSegments: Float;
+      heightSegments: Float;
+      phiStart: Float;
+      phiLength: Float;
+      thetaStart: Float;
+      thetaLength: Float;
+    end;
+    function clone: JSphereBufferGeometry;
+  end;
+
+  JSphereGeometry = class external 'three.SphereGeometry'(JGeometry)
+    constructor Create(radius: Float; widthSegments: Float; heightSegments: Float; phiStart: Float; phiLength: Float; thetaStart: Float; thetaLength: Float);
+    parameters: record
+      radius: Float;
+      widthSegments: Float;
+      heightSegments: Float;
+      phiStart: Float;
+      phiLength: Float;
+      thetaStart: Float;
+      thetaLength: Float;
+    end;
+  end;
+
+  JTetrahedronGeometry = class external 'three.TetrahedronGeometry'(JPolyhedronGeometry)
+    constructor Create(radius: Float; detail: Float);
+    function clone: JTetrahedronGeometry;
+  end;
+
+  JTorusGeometry = class external 'three.TorusGeometry'(JGeometry)
+    constructor Create(radius: Float; tube: Float; radialSegments: Float; tubularSegments: Float; arc: Float);
+    parameters: record
+      radius: Float;
+      tube: Float;
+      radialSegments: Float;
+      tubularSegments: Float;
+      arc: Float;
+    end;
+    function clone: JTorusGeometry;
+  end;
+
+  JTorusKnotGeometry = class external 'three.TorusKnotGeometry'(JGeometry)
+    constructor Create(radius: Float; tube: Float; radialSegments: Float; tubularSegments: Float; p: Float; q: Float; heightScale: Float);
+    parameters: record
+      radius: Float;
+      tube: Float;
+      radialSegments: Float;
+      tubularSegments: Float;
+      p: Float;
+      q: Float;
+      heightScale: Float;
+    end;
+    function clone: JTorusKnotGeometry;
+  end;
+
+  JTubeGeometry = class external 'three.TubeGeometry'(JGeometry)
+    constructor Create(path: JPath; segments: Float; radius: Float; radiusSegments: Float; closed: Boolean; taper: function(u: Float): Float);
+    parameters: record
+      path: JPath;
+      segments: Float;
+      radius: Float;
+      radialSegments: Float;
+      closed: Boolean;
+      taper: function(u: Float): Float;
+    end;
+    tangents: array of JVector3;
+    normals: array of JVector3;
+    binormals: array of JVector3;
+    function NoTaper: Float; overload;
+    function NoTaper(u: Float): Float; overload;
+    function SinusoidalTaper(u: Float): Float;
+    procedure FrenetFrames(path: JPath; segments: Float; closed: Boolean);
+    function clone: JTubeGeometry;
+  end;
+
+  JWireframeGeometry = class external 'three.WireframeGeometry'(JBufferGeometry)
+    constructor Create(geometry: Variant {JGeometry or JBufferGeometry});
+  end;
+
+  JArrowHelper = class external 'three.ArrowHelper'(JObject3D)
+    constructor Create(dir: JVector3; origin: JVector3; _length: Float; hex: Float; headLength: Float; headWidth: Float);
+    line: JLine;
+    cone: JMesh;
+    procedure setDirection(dir: JVector3);
+    procedure setLength(_length: Float); overload;
+    procedure setLength(_length: Float; headLength: Float); overload;
+    procedure setLength(_length: Float; headLength: Float; headWidth: Float); overload;
+    procedure setColor(hex: Float);
+  end;
+
+  JAxisHelper = class external 'three.AxisHelper'(JLineSegments)
+    constructor Create(size: Float);
+  end;
+
+  JBoundingBoxHelper = class external 'three.BoundingBoxHelper'(JMesh)
+    constructor Create(&object: JObject3D; hex: Float);
+    &object: JObject3D;
+    box: JBox3;
+    procedure update;
+  end;
+
+  JBoxHelper = class external 'three.BoxHelper'(JLineSegments)
+    constructor Create(&object: JObject3D);
+    procedure update; overload;
+    procedure update(&object: JObject3D); overload;
+  end;
+
+  JCameraHelper = class external 'three.CameraHelper'(JLineSegments)
+    constructor Create(camera: JCamera);
+    camera: JCamera;
+(* RODO
+    pointMap: record
+      // property Item[id: String]: array of Float;
+    end;
+*)
+    procedure update;
+  end;
+
+  JDirectionalLightHelper = class external 'three.DirectionalLightHelper'(JObject3D)
+    constructor Create(light: JLight; size: Float);
+    light: JLight;
+    lightPlane: JLine;
+    targetLine: JLine;
+    procedure dispose;
+    procedure update;
+  end;
+
+  JEdgesHelper = class external 'three.EdgesHelper'(JLineSegments)
+    constructor Create(&object: JObject3D; hex: Float; thresholdAngle: Float);
+  end;
+
+  JFaceNormalsHelper = class external 'three.FaceNormalsHelper'(JLineSegments)
+    constructor Create(&object: JObject3D; size: Float; hex: Float; linewidth: Float);
+    &object: JObject3D;
+    size: Float;
+    procedure update; overload;
+    procedure update(&object: JObject3D); overload;
+  end;
+
+  JGridHelper = class external 'three.GridHelper'(JLineSegments)
+    constructor Create(size: Float; step: Float);
+    color1: JColor;
+    color2: JColor;
+    procedure setColors(colorCenterLine: Float; colorGrid: Float);
+  end;
+
+  JHemisphereLightHelper = class external 'three.HemisphereLightHelper'(JObject3D)
+    constructor Create(light: JLight; sphereSize: Float);
+    light: JLight;
+    colors: array of JColor;
+    lightSphere: JMesh;
+    procedure dispose;
+    procedure update;
+  end;
+
+  JPointLightHelper = class external 'three.PointLightHelper'(JObject3D)
+    constructor Create(light: JLight; sphereSize: Float);
+    light: JLight;
+    procedure dispose;
+    procedure update;
+  end;
+
+  JSkeletonHelper = class external 'three.SkeletonHelper'(JLineSegments)
+    constructor Create(bone: JObject3D);
+    bones: array of JBone;
+    root: JObject3D;
+    function getBoneList(&object: JObject3D): array of JBone;
+    procedure update;
+  end;
+
+  JSpotLightHelper = class external 'three.SpotLightHelper'(JObject3D)
+    constructor Create(light: JLight; sphereSize: Float; arrowLength: Float);
+    light: JLight;
+    cone: JMesh;
+    procedure dispose;
+    procedure update;
+  end;
+
+  JVertexNormalsHelper = class external 'three.VertexNormalsHelper'(JLineSegments)
+    constructor Create(&object: JObject3D; size: Float; hex: Float; linewidth: Float);
+    &object: JObject3D;
+    size: Float;
+    procedure update; overload;
+    procedure update(&object: JObject3D); overload;
+  end;
+
+  JWireframeHelper = class external 'three.WireframeHelper'(JLineSegments)
+    constructor Create(&object: JObject3D; hex: Float);
+  end;
+
+  JImmediateRenderObject = class external 'three.ImmediateRenderObject'(JObject3D)
+    constructor Create(material: JMaterial);
+    material: JMaterial;
+    procedure render(renderCallback: procedure);
+  end;
+
+  JBoundingBox = class external
+    minX: Float;
+    minY: Float;
+    minZ: Float; // nullable
+    maxX: Float;
+    maxY: Float;
+    maxZ: Float; // nullable
+  end;
+
+  JMorphBlendMeshAnimation = class external
+    start: Float;
+    &end: Float;
+    _length: Float;
+    fps: Float;
+    duration: Float;
+    lastFrame: Float;
+    currentFrame: Float;
+    active: Boolean;
+    time: Float;
+    direction: Float;
+    weight: Float;
+    directionBackwards: Boolean;
+    mirroredLoop: Boolean;
+  end;
+
+  JMorphBlendMesh = class external 'three.MorphBlendMesh'(JMesh)
+    constructor Create(geometry: JGeometry; material: JMaterial);
+(* TODO
+    animationsMap: record
+      // property Item[name: String]: JMorphBlendMeshAnimation;
+    end;
+*)
+    animationsList: array of JMorphBlendMeshAnimation;
+    procedure createAnimation(name: String; start: Float; &end: Float; fps: Float);
+    procedure autoCreateAnimations(fps: Float);
+    procedure setAnimationDirectionForward(name: String);
+    procedure setAnimationDirectionBackward(name: String);
+    procedure setAnimationFPS(name: String; fps: Float);
+    procedure setAnimationDuration(name: String; duration: Float);
+    procedure setAnimationWeight(name: String; weight: Float);
+    procedure setAnimationTime(name: String; time: Float);
+    function getAnimationTime(name: String): Float;
+    function getAnimationDuration(name: String): Float;
+    procedure playAnimation(name: String);
+    procedure stopAnimation(name: String);
+    procedure update(delta: Float);
+  end;
+
+  JRenderer = class external
+    procedure render(scene: JScene; camera: JCamera);
+    procedure setSize(width: Float; height: Float); overload;
+    procedure setSize(width: Float; height: Float; updateStyle: Boolean); overload;
+    domElement: JHTMLCanvasElement;
   end;
 
   JShaderChunk = class external
@@ -3380,150 +3496,153 @@ type
 
   JWebGLGeometriesInstance = class external
     constructor Create;
-    function get(&object: Variant): Variant
+    function get(&object: Variant): Variant;
   end;
 
   JWebGLGeometriesStatic = class external
-    function(_gl: Variant; extensions: Variant; _infoRender: Variant): JWebGLGeometriesInstance;
+// TODO:    function (_gl: Variant; extensions: Variant; _infoRender: Variant): JWebGLGeometriesInstance;
   end;
 
   JWebGLIndexedBufferRendererInstance = class external
     constructor Create;
-    procedure setMode(value: Variant)
-    procedure setIndex(index: Variant)
-    procedure render(start: Variant; count: Variant)
-    procedure renderInstances(geometry: Variant)
+    procedure setMode(value: Variant);
+    procedure setIndex(index: Variant);
+    procedure render(start: Variant; count: Variant);
+    procedure renderInstances(geometry: Variant);
   end;
 
   JWebGLIndexedBufferRendererStatic = class external
-    function(_gl: Variant; extensions: Variant; _infoRender: Variant): JWebGLIndexedBufferRendererInstance;
+// TODO:    function(_gl: Variant; extensions: Variant; _infoRender: Variant): JWebGLIndexedBufferRendererInstance;
   end;
 
   JWebGLObjectsInstance = class external
     constructor Create;
-    function getAttributeBuffer(attribute: Variant): Variant
-    function getWireframeAttribute(geometry: Variant): Variant
-    procedure update(&object: Variant)
+    function getAttributeBuffer(attribute: Variant): Variant;
+    function getWireframeAttribute(geometry: Variant): Variant;
+    procedure update(&object: Variant);
   end;
 
   JWebGLObjectsStatic = class external
-    function(gl: Variant; properties: Variant; info: Variant): JWebGLObjectsInstance;
+// TODO:    function(gl: Variant; properties: Variant; info: Variant): JWebGLObjectsInstance;
   end;
 
   JWebGLProgramsInstance = class external
     constructor Create;
-    function getParameters(material: Variant; lights: Variant; fog: Variant; &object: Variant): array of Variant
-    function getProgramCode(material: Variant; parameters: Variant): Variant
-    function acquireProgram(material: Variant; parameters: Variant; code: Variant): Variant
-    procedure releaseProgram(program: Variant)
+    function getParameters(material: Variant; lights: Variant; fog: Variant; &object: Variant): array of Variant;
+    function getProgramCode(material: Variant; parameters: Variant): Variant;
+    function acquireProgram(material: Variant; parameters: Variant; code: Variant): Variant;
+    procedure releaseProgram(program: Variant);
   end;
 
   JWebGLProgramsStatic = class external
-    function: JWebGLProgramsInstance;
+// TODO:    function: JWebGLProgramsInstance;
   end;
 
   JWebGLPropertiesInstance = class external
     constructor Create;
-    function get(&object: Variant): Variant
-    procedure delete(&object: Variant)
-    procedure clear
+    function get(&object: Variant): Variant;
+    procedure delete(&object: Variant);
+    procedure clear;
   end;
 
   JWebGLPropertiesStatic = class external
-    function: JWebGLPropertiesInstance;
-  end;
-
-  JWebGLShadowMapInstance = class external
-    constructor Create;
-    enabled: Boolean;
-    autoUpdate: Boolean;
-    needsUpdate: Boolean;
-    &type: JShadowMapType;
-    cullFace: JCullFace;
-    procedure render(scene: JScene)
+// TODO:    function: JWebGLPropertiesInstance;
   end;
 
   JWebGLShadowMapStatic = class external
-    function(_renderer: JRenderer; _lights: array of Variant; _objects: array of Variant): JWebGLStateInstance;
+// TODO:    function(_renderer: JRenderer; _lights: array of Variant; _objects: array of Variant): JWebGLStateInstance;
   end;
 
   JWebGLStateInstance = class external
     constructor Create;
-    procedure init
-    procedure initAttributes
-    procedure enableAttribute(attribute: String)
-    procedure enableAttributeAndDivisor(attribute: String; meshPerAttribute: Variant; extension: Variant)
-    procedure disableUnusedAttributes
-    procedure enable(id: String)
-    procedure disable(id: String)
-    function getCompressedTextureFormats: Variant
-    procedure setBlending(blending: Float; blendEquation: Float; blendSrc: Float; blendDst: Float; blendEquationAlpha: Float; blendSrcAlpha: Float; blendDstAlpha: Float)
-    procedure setDepthFunc(func: JFunction)
-    procedure setDepthTest(depthTest: Float)
-    procedure setDepthWrite(depthWrite: Float)
-    procedure setColorWrite(colorWrite: Float)
-    procedure setFlipSided(flipSided: Float)
-    procedure setLineWidth(width: Float)
-    procedure setPolygonOffset(polygonoffset: Float; factor: Float; units: Float)
-    procedure setScissorTest(scissorTest: Boolean)
-    procedure activeTexture(webglSlot: Variant)
-    procedure bindTexture(webglType: Variant; webglTexture: Variant)
-    procedure compressedTexImage2D
-    procedure texImage2D
-    procedure reset
+    procedure init;
+    procedure initAttributes;
+    procedure enableAttribute(attribute: String);
+    procedure enableAttributeAndDivisor(attribute: String; meshPerAttribute: Variant; extension: Variant);
+    procedure disableUnusedAttributes;
+    procedure enable(id: String);
+    procedure disable(id: String);
+    function getCompressedTextureFormats: Variant;
+    procedure setBlending(blending: Float; blendEquation: Float; blendSrc: Float; blendDst: Float; blendEquationAlpha: Float; blendSrcAlpha: Float; blendDstAlpha: Float);
+    procedure setDepthFunc(func: procedure);
+    procedure setDepthTest(depthTest: Float);
+    procedure setDepthWrite(depthWrite: Float);
+    procedure setColorWrite(colorWrite: Float);
+    procedure setFlipSided(flipSided: Float);
+    procedure setLineWidth(width: Float);
+    procedure setPolygonOffset(polygonoffset: Float; factor: Float; units: Float);
+    procedure setScissorTest(scissorTest: Boolean);
+    procedure activeTexture(webglSlot: Variant);
+    procedure bindTexture(webglType: Variant; webglTexture: Variant);
+    procedure compressedTexImage2D;
+    procedure texImage2D;
+    procedure reset;
   end;
 
   JWebGLStateStatic = class external
-    function(gl: Variant; extensions: Variant; paramThreeToGL: JFunction): JWebGLStateInstance;
+// TODO:    function(gl: Variant; extensions: Variant; paramThreeToGL: JFunction): JWebGLStateInstance;
   end;
 
   JRendererPlugin = class external
-    procedure init(renderer: JWebGLRenderer)
-    procedure render(scene: JScene; camera: JCamera; currentWidth: Float; currentHeight: Float)
+    procedure init(renderer: JWebGLRenderer);
+    procedure render(scene: JScene; camera: JCamera; currentWidth: Float; currentHeight: Float);
   end;
 
-  JIFog = class external
-    name: String;
-    color: JColor;
-    function clone: JIFog
+  JAnimationUtils = class external
+    function getEqualsFunc(exemplarValue: Variant): Boolean;
+// TODO:   function clone(exemplarValue: JT): JT;
+    function lerp(a: Variant; b: Variant; alpha: Float; interTrack: Boolean): Variant;
+    function lerp_object(a: Variant; b: Variant; alpha: Float): Variant;
+    function slerp_object(a: Variant; b: Variant; alpha: Float): Variant;
+    function lerp_number(a: Variant; b: Variant; alpha: Float): Variant;
+    function lerp_boolean(a: Variant; b: Variant; alpha: Float): Variant;
+    function lerp_boolean_immediate(a: Variant; b: Variant; alpha: Float): Variant;
+    function lerp_string(a: Variant; b: Variant; alpha: Float): Variant;
+    function lerp_string_immediate(a: Variant; b: Variant; alpha: Float): Variant;
+    function getLerpFunc(exemplarValue: Variant; interTrack: Boolean): procedure;
   end;
 
-  JBoundingBox = class external
-    minX: Float;
-    minY: Float;
-    minZ: Float; // nullable
-    maxX: Float;
-    maxY: Float;
-    maxZ: Float; // nullable
+  JUniformsUtils = class external
+    function merge(uniforms: array of Variant): Variant;
+    function clone(uniforms_src: Variant): Variant;
   end;
 
-  JPathAction = class external
-    action: JPathActions;
-    args: Variant;
+  JCurvesUtils = class external
+    function tangentQuadraticBezier(t, p0, p1, p2: Float): Float;
+    function tangentCubicBezier(t, p0, p1, p2, p3: Float): Float;
+    function tangentSpline(t, p0, p1, p2, p3: Float): Float;
+    function interpolate(p0, p1, p2, p3, t: Float): Float;
   end;
 
-  JMorphBlendMeshAnimation = class external
-    start: Float;
-    &end: Float;
-    _length: Float;
-    fps: Float;
-    duration: Float;
-    lastFrame: Float;
-    currentFrame: Float;
-    active: Boolean;
-    time: Float;
-    direction: Float;
-    weight: Float;
-    directionBackwards: Boolean;
-    mirroredLoop: Boolean;
+  JImageUtils = class external
+    crossOrigin: String;
+    function loadTexture(url: String): JTexture; overload;
+    function loadTexture(url: String; mapping: JMapping): JTexture; overload;
+    function loadTexture(url: String; mapping: JMapping; onLoad: procedure(texture: JTexture)): JTexture; overload;
+    function loadTexture(url: String; mapping: JMapping; onLoad: procedure(texture: JTexture); onError: procedure(message: String)): JTexture; overload;
+    function loadTextureCube(&array: array of String): JTexture; overload;
+    function loadTextureCube(&array: array of String; mapping: JMapping): JTexture; overload;
+    function loadTextureCube(&array: array of String; mapping: JMapping; onLoad: procedure(texture: JTexture)): JTexture; overload;
+    function loadTextureCube(&array: array of String; mapping: JMapping; onLoad: procedure(texture: JTexture); onError: procedure(message: String)): JTexture; overload;
+    function getNormalMap(image: JHTMLImageElement): JHTMLCanvasElement; overload;
+    function getNormalMap(image: JHTMLImageElement; depth: Float): JHTMLCanvasElement; overload;
+    function generateDataTexture(width: Float; height: Float; color: JColor): JDataTexture;
   end;
 
-procedure warn; overload;
-procedure warn(message: Variant; optionalParams: array of Variant); overload;
-procedure error; overload;
-procedure error(message: Variant; optionalParams: array of Variant); overload;
-procedure log; overload;
-procedure log(message: Variant; optionalParams: array of Variant); overload;
+  JSceneUtils = class external
+    function createMultiMaterialObject(geometry: JGeometry; materials: array of JMaterial): JObject3D;
+    procedure detach(child: JObject3D; parent: JObject3D; scene: JScene);
+    procedure attach(child: JObject3D; scene: JScene; parent: JObject3D);
+  end;
+
+  JShapeUtils = class external
+    function area(contour: array of Float): Float;
+    function triangulate(contour: array of Float; indices: Boolean): array of Float;
+    function triangulateShape(contour: array of Float; holes: array of Variant): array of Float;
+    function isClockWise(pts: array of Float): Boolean;
+    function b2(t, p0, p1, p2: Float): Float;
+    function b3(t, p0, p1, p2, p3: Float): Float;
+  end;
 
 var
   REVISION: String;
@@ -3621,24 +3740,14 @@ var
   LoopOnce: JAnimationActionLoopStyles;
   LoopRepeat: JAnimationActionLoopStyles;
   LoopPingPong: JAnimationActionLoopStyles;
-  AnimationUtils:     function getEqualsFunc(exemplarValue: Variant): Boolean
-    function clone(exemplarValue: JT): JT
-    function lerp(a: Variant; b: Variant; alpha: Float; interTrack: Boolean): Variant
-    function lerp_object(a: Variant; b: Variant; alpha: Float): Variant
-    function slerp_object(a: Variant; b: Variant; alpha: Float): Variant
-    function lerp_number(a: Variant; b: Variant; alpha: Float): Variant
-    function lerp_boolean(a: Variant; b: Variant; alpha: Float): Variant
-    function lerp_boolean_immediate(a: Variant; b: Variant; alpha: Float): Variant
-    function lerp_string(a: Variant; b: Variant; alpha: Float): Variant
-    function lerp_string_immediate(a: Variant; b: Variant; alpha: Float): Variant
-    function getLerpFunc(exemplarValue: Variant; interTrack: Boolean): JFunction
-  end;;
+  AnimationUtils: JAnimationUtils;
   Cache: JCache;
   Math: JMath;
   LineStrip: JLineMode;
   LinePieces: JLineMode;
   ShaderChunk: JShaderChunk;
-  ShaderLib:     // property Item[name: String]: JShader;
+  ShaderLib: record
+    // property Item[name: String]: JShader;
     basic: JShader;
     lambert: JShader;
     phong: JShader;
@@ -3650,8 +3759,9 @@ var
     cube: JShader;
     equirect: JShader;
     depthRGBA: JShader;
-  end;;
-  UniformsLib:     common: Variant;
+  end;
+  UniformsLib: record
+    common: Variant;
     aomap: Variant;
     lightmap: Variant;
     emissivemap: Variant;
@@ -3662,10 +3772,8 @@ var
     lights: Variant;
     points: Variant;
     shadowmap: Variant;
-  end;;
-  UniformsUtils:     function merge(uniforms: array of Variant): Variant
-    function clone(uniforms_src: Variant): Variant
-  end;;
+  end;
+  UniformsUtils: JUniformsUtils;
   WebGLGeometries: JWebGLGeometriesStatic;
   WebGLIndexedBufferRenderer: JWebGLIndexedBufferRendererStatic;
   WebGLObjects: JWebGLObjectsStatic;
@@ -3673,42 +3781,14 @@ var
   WebGLProperties: JWebGLPropertiesStatic;
   WebGLShadowMap: JWebGLShadowMapStatic;
   WebGLState: JWebGLStateStatic;
-  CurveUtils:     function tangentQuadraticBezier(t: Float; p0: Float; p1: Float; p2: Float): Float
-    function tangentCubicBezier(t: Float; p0: Float; p1: Float; p2: Float; p3: Float): Float
-    function tangentSpline(t: Float; p0: Float; p1: Float; p2: Float; p3: Float): Float
-    function interpolate(p0: Float; p1: Float; p2: Float; p3: Float; t: Float): Float
-  end;;
-  ImageUtils:     crossOrigin: String;
-    function loadTexture(url: String): JTexture; overload;
-    function loadTexture(url: String; mapping: JMapping): JTexture; overload;
-    function loadTexture(url: String; mapping: JMapping; onLoad: procedure(texture: JTexture)): JTexture; overload;
-    function loadTexture(url: String; mapping: JMapping; onLoad: procedure(texture: JTexture); onError: procedure(message: String)): JTexture; overload;
-    function loadTextureCube(&array: array of String): JTexture; overload;
-    function loadTextureCube(&array: array of String; mapping: JMapping): JTexture; overload;
-    function loadTextureCube(&array: array of String; mapping: JMapping; onLoad: procedure(texture: JTexture)): JTexture; overload;
-    function loadTextureCube(&array: array of String; mapping: JMapping; onLoad: procedure(texture: JTexture); onError: procedure(message: String)): JTexture; overload;
-    function getNormalMap(image: JHTMLImageElement): JHTMLCanvasElement; overload;
-    function getNormalMap(image: JHTMLImageElement; depth: Float): JHTMLCanvasElement; overload;
-    function generateDataTexture(width: Float; height: Float; color: JColor): JDataTexture
-  end;;
-  SceneUtils:     function createMultiMaterialObject(geometry: JGeometry; materials: array of JMaterial): JObject3D
-    procedure detach(child: JObject3D; parent: JObject3D; scene: JScene)
-    procedure attach(child: JObject3D; scene: JScene; parent: JObject3D)
-  end;;
-  ShapeUtils:     function area(contour: array of Float): Float
-    function triangulate(contour: array of Float; indices: Boolean): array of Float
-    function triangulateShape(contour: array of Float; holes: array of Variant): array of Float
-    function isClockWise(pts: array of Float): Boolean
-    function b2(t: Float; p0: Float; p1: Float; p2: Float): Float
-    function b3(t: Float; p0: Float; p1: Float; p2: Float; p3: Float): Float
-  end;;
-  CurveUtils:     function tangentQuadraticBezier(t: Float; p0: Float; p1: Float; p2: Float): Float
-    function tangentCubicBezier(t: Float; p0: Float; p1: Float; p2: Float; p3: Float): Float
-    function tangentSpline(t: Float; p0: Float; p1: Float; p2: Float; p3: Float): Float
-    function interpolate(p0: Float; p1: Float; p2: Float; p3: Float; t: Float): Float
-  end;;
+  CurveUtils: JCurvesUtils;
+  ImageUtils: JImageUtils;
+  SceneUtils: JSceneUtils;
+  ShapeUtils: JShapeUtils;
 
-
-//'three'
-
-
+procedure warn; overload; external;
+procedure warn(message: Variant; optionalParams: array of Variant); overload; external;
+procedure error; overload; external;
+procedure error(message: Variant; optionalParams: array of Variant); overload; external;
+procedure log; overload; external;
+procedure log(message: Variant; optionalParams: array of Variant); overload; external;
