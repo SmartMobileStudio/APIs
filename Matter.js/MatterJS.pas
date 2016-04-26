@@ -236,9 +236,9 @@ type
   end;
 
   JComposite = class external 'Composite'
-    function add(composite: JComposite; &object: JBody): JComposite; overload;
-    function add(composite: JComposite; &object: JComposite): JComposite; overload;
-    function add(composite: JComposite; &object: JConstraint): JComposite; overload;
+    class function add(composite: JComposite; &object: JBody): JComposite; overload;
+    class function add(composite: JComposite; &object: JComposite): JComposite; overload;
+    class function add(composite: JComposite; &object: JConstraint): JComposite; overload;
     function allBodies(composite: JComposite): array of Variant;
     function allComposites(composite: JComposite): array of Variant;
     function allConstraints(composite: JComposite): array of Variant;
@@ -248,13 +248,13 @@ type
     class function create(options: JICompositeDefinition): JComposite; overload;
     function get(composite: JComposite; id: Float; &type: String): Variant {JBody or JComposite or JConstraint};
     function move(compositeA: JComposite; objects: array of Variant; compositeB: JComposite): JComposite;
-    function rebase(composite: JComposite): JComposite;
-    function remove(composite: JComposite; &object: JBody): JComposite; overload;
-    function remove(composite: JComposite; &object: JComposite): JComposite; overload;
-    function remove(composite: JComposite; &object: JConstraint): JComposite; overload;
-    function remove(composite: JComposite; &object: JBody; deep: Boolean): JComposite; overload;
-    function remove(composite: JComposite; &object: JComposite; deep: Boolean): JComposite; overload;
-    function remove(composite: JComposite; &object: JConstraint; deep: Boolean): JComposite; overload;
+    class function rebase(composite: JComposite): JComposite;
+    class function remove(composite: JComposite; &object: JBody): JComposite; overload;
+    class function remove(composite: JComposite; &object: JComposite): JComposite; overload;
+    class function remove(composite: JComposite; &object: JConstraint): JComposite; overload;
+    class function remove(composite: JComposite; &object: JBody; deep: Boolean): JComposite; overload;
+    class function remove(composite: JComposite; &object: JComposite; deep: Boolean): JComposite; overload;
+    class function remove(composite: JComposite; &object: JConstraint; deep: Boolean): JComposite; overload;
     procedure setModified(composite: JComposite; isModified: Boolean); overload;
     procedure setModified(composite: JComposite; isModified, updateParents: Boolean); overload;
     procedure setModified(composite: JComposite; isModified, updateParents, updateChildren: Boolean); overload;
@@ -455,7 +455,7 @@ type
     bounds: JBounds; // nullable
   end;
 
-  JWorld = class external 'Matter.World'
+  JWorld = class external 'Matter.World' (JComposite)
     class function add(world: JWorld; body: JBody): JWorld; overload;
     class function add(world: JWorld; body: JComposite): JWorld; overload;
     class function add(world: JWorld; body: JConstraint): JWorld; overload;
