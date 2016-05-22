@@ -3,14 +3,14 @@ unit GulpUtil;
 interface
 
 uses
-  NodeJS.Core, NodeJS.Stream;
+  NodeJS.Core, NodeJS.Stream, Vinyl;
 
 type
   JPluginErrorOptions = class external
     name: String; // nullable
     message: Variant; // nullable
     fileName: String; // nullable
-    lineNumber: Float; // nullable
+    lineNumber: Integer; // nullable
     stack: String; // nullable
     showStack: Boolean; // nullable
     showProperties: Boolean; // nullable
@@ -18,10 +18,9 @@ type
     error: JError; // nullable
   end;
 
-(*
-  JFile = class external 'gulp-util.File'(Jvinyl)
+  JFile = class external 'gulp-util.File' (Vinyl.JFile)
   end;
-*)
+
   JPluginError = class external 'PluginError'
     constructor Create(options: JPluginErrorOptions); overload;
     constructor Create(pluginName: String; options: JPluginErrorOptions); overload;
@@ -30,7 +29,7 @@ type
     name: String;
     message: Variant;
     fileName: String;
-    lineNumber: Float;
+    lineNumber: Integer;
     stack: String;
     showStack: Boolean;
     showProperties: Boolean;
