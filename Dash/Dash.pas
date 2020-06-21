@@ -3,7 +3,7 @@ unit Dash;
 interface
 
 uses
-  W3C.DOM4, W3C.HTML5;
+  W3C.DOM, W3C.HTML5;
 
 type
   JLogLevel = Integer;
