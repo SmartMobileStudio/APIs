@@ -3,7 +3,7 @@ unit Jitsi;
 interface
 
 uses
-  W3C.DOM, W3C.Html5;
+  ECMA.Promise, W3C.DOM, W3C.Html5;
 
 type
   JJitsiConfigHosts = class external
@@ -887,23 +887,113 @@ type
     userInfo: JJitsiInterfaceUserInfo;
   end;
 
+  TDeviceClass = String;
+  TDeviceClassHelper = strict helper for TDeviceClass
+    const AudioInput = 'audioinput';
+    const AudioOutput = 'audiooutput';
+    const VideoInput = 'videoinput';
+  end;
+
+  JDevice = class external
+    deviceId: String;
+    groupId: String;
+    kind: TDeviceClass;
+    label: String;
+  end;
+
+  JAvailableDevices = class external
+    audioInput: array of JDevice;
+    audioOutput: array of JDevice;
+    videoInput: array of JDevice;
+  end;
+
+  JCurrentDevices = class external
+    audioInput: array of JDevice;
+    audioOutput: array of JDevice;
+    videoInput: array of JDevice;
+  end;
+
+  TOnFulfilledGetAvailableDevices = procedure(response: JAvailableDevices);
+  JPromiseGetAvailableDevices = class external 'Promise' (JPromise)
+  public
+    class function resolve(value: JAvailableDevices): JPromiseGetAvailableDevices;
+
+    function &then(onFulfilled: TOnFulfilledGetAvailableDevices): JPromiseGetAvailableDevices; overload;
+    function &then(onFulfilled: TOnFulfilledGetAvailableDevices; onRejected: TOnRejected): JPromiseGetAvailableDevices; overload;
+  end;
+
+  TOnFulfilledGetCurrentDevices = procedure(response: JCurrentDevices);
+  JPromiseGetCurrentDevices = class external 'Promise' (JPromise)
+  public
+    class function resolve(value: JCurrentDevices): JPromiseGetCurrentDevices;
+
+    function &then(onFulfilled: TOnFulfilledGetCurrentDevices): JPromiseGetCurrentDevices; overload;
+    function &then(onFulfilled: TOnFulfilledGetCurrentDevices; onRejected: TOnRejected): JPromiseGetCurrentDevices; overload;
+  end;
+
+  TJitsiSendTones = class external
+    tones: string;
+    duration: Integer;
+    pause: Integer;
+  end;
+
+  TJitsiStartRecording = class external
+    mode: String; //recording mode, either `file` or `stream`.
+    dropboxToken: String; //dropbox oauth2 token.
+    shouldShare: Boolean; //whether the recording should be shared with the participants or not. Only applies to certain jitsi meet deploys.
+    youtubeStreamKey: String; //the youtube stream key.
+    youtubeBroadcastID: String; //the youtube broacast ID.
+  end;
+
+  TJitsiStopRecording = class external
+    mode: String; //recording mode, either `file` or `stream`.
+  end;
+
+  TJitsiCommand = String;
+  TJitsiCommandHelper = strict helper for TJitsiCommand
+    const DisplayName = 'displayName';
+    const Password = 'password';
+    const SendTones = 'sendTones';
+    const Subject = 'subject';
+    const ToggleAudio = 'toggleAudio';
+    const ToggleVideo = 'toggleVideo';
+    const ToggleFilmStrip = 'toggleFilmStrip';
+    const ToggleChat = 'toggleChat';
+    const ToggleShareScreen = 'toggleShareScreen';
+    const ToggleTileView = 'toggleTileView';
+    const Hangup = 'hangup';
+    const Email = 'email';
+    const AvatarUrl = 'avatarUrl';
+    const SendEndpointTextMessage = 'sendEndpointTextMessage';
+    const SetVideoQuality = 'setVideoQuality';
+    const MuteEveryone = 'muteEveryone';
+    const StartRecording = 'startRecording';
+    const StopRecording = 'stopRecording';
+  end;
+
   JJitsiAPI = class external 'JitsiMeetExternalAPI'
   public
     constructor Create; overload;
     constructor Create(Domain: String); overload;
     constructor Create(Domain: String; Options: JJitsiOptions); overload;
 
-    function getAvailableDevices: Variant;
-    procedure getCurrentDevices;
-    procedure isDeviceChangeAvailable;
-    procedure isDeviceListAvailable;
-    procedure isMultipleAudioInputSupported;
-    procedure setAudioInputDevice;
-    procedure setAudioOutputDevice;
-    procedure setVideoInputDevice;
+    function getAvailableDevices: JPromiseGetAvailableDevices;
+    function getCurrentDevices: JPromiseGetCurrentDevices;
+    function isDeviceChangeAvailable: JPromiseBoolean;
+    function isDeviceListAvailable: JPromiseBoolean;
+    function isMultipleAudioInputSupported: JPromiseBoolean;
+    procedure setAudioInputDevice(deviceLabel, deviceId: String);
+    procedure setAudioOutputDevice(deviceLabel, deviceId: String);
+    procedure setVideoInputDevice(deviceLabel, deviceId: String);
 
-    procedure executeCommand(command: String; argument: String); overload;
-    procedure executeCommand(command: String; arguments: Variant); overload;
+    procedure executeCommand(command: TJitsiCommand; argument: String); overload;
+    procedure executeCommand(command: TJitsiCommand; argument: Integer); overload;
+    procedure executeCommand(command: TJitsiCommand; arg1, arg2: String); overload;
+    procedure executeCommand(command: TJitsiCommand; arguments: TJitsiSendTones); overload;
+    procedure executeCommand(command: TJitsiCommand; arguments: TJitsiStartRecording); overload;
+    procedure executeCommand(command: TJitsiCommand; arguments: TJitsiStopRecording); overload;
+
+    procedure executeCommands(commands: Variant); overload;
 
     function getNumberOfParticipants: Integer;
 
@@ -913,19 +1003,13 @@ type
 
     procedure getIFrame;
 
-    procedure isAudioMuted;
-    procedure isVideoMuted;
+    function isAudioMuted: JPromiseBoolean;
+    function isVideoMuted: JPromiseBoolean;
 
-    procedure isAudioAvailable;
-    procedure isVideoAvailable;
+    function isAudioAvailable: JPromiseBoolean;
+    function isVideoAvailable: JPromiseBoolean;
 
-    procedure invite;
+    function invite: JPromiseBoolean;
 
     procedure dispose;
   end;
-
-implementation
-
-
-
-end.
